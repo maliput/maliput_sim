@@ -38,5 +38,7 @@
 # Imports
 ##############################################################################
 
-from . import agent
-from . import simulation
+import maliput_sim.core as core
+import maliput_sim.simulation as simulation
+
+__all__ = ['core', 'simulation']

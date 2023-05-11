@@ -29,9 +29,8 @@
 
 from dataclasses import dataclass
 
-from maliput_sim.agent import Agent
-from maliput_sim.simulation_config import SimulationConfig
-from . import entity_component_manager
+from maliput_sim.core.components import *
+from maliput_sim.core.ecm import *
 
 
 @dataclass
@@ -67,7 +66,7 @@ class Simulation:
         self._entity_component_manager = EntityComponentManager()
 
         # Add the road network to the simulation.
-        rn_entity = entity_component_manager.create_entity()
+        rn_entity = self._entity_component_manager.create_entity()
         rn_entity.add_component(Name(road_network.road_geometry().id()))
         rn_entity.add_component(Type("road_network"))
         rn_entity.add_component(RoadNetwork(road_network))
@@ -78,18 +77,18 @@ class Simulation:
         # The list of entities with expected dynamic behavior in the simulation that are expected to be stepped.
         self._dynamic_entities = []
 
-    def add_agent(self, initial_state, controller):
+    def add_agent(self, initial_state: AgentInitialState, controller):
         """Adds an agent to the simulation.
 
         Args:
             agent: The agent to add.
 
         """
-        agent_entity = entity_component_manager.create_entity()
-        agent_entity.add_component(Name(name))
+        agent_entity = self._entity_component_manager.create_entity()
+        agent_entity.add_component(Name(initial_state.name))
         agent_entity.add_component(Type("agent"))
-        agent_entity.add_component(Pose(position, rotation))
-        agent_entity.add_component(Velocity(linear_vel, angular_vel))
+        agent_entity.add_component(Pose(initial_state.position, initial_state.rotation))
+        agent_entity.add_component(Velocity(initial_state.linear_vel, initial_state.angular_vel))
         agent_entity.add_component(Controller(controller))
 
         self._dynamic_entities.append(agent_entity)

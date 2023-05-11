@@ -27,51 +27,53 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import os
-
-from maliput_sim.simulation import Simulation, SimulationConfig, AgentInitialState
-
-import maliput.plugin
+class Component:
+    """Base class for components."""
+    pass
 
 
-# Controller to be executed for the agent during the step
-def agent_controller(duration, sim_state, entity, ecm):
-    """Agent controller."""
-    pose = entity.get_component("pose")
-    velocity = entity.get_component("velocity")
+class Name(Component):
+    """A component that stores a name."""
 
-    # Move the agent forward in X direction using the current velocity.
-    pose.position[0] += duration * velocity.linear[0]
+    def __init__(self, name):
+        self.name = name
 
 
-def main():
-    """Main entry point."""
+class Type(Component):
+    """
+    A component that stores a type.
+    Useful for distinguishing between different types of entities.
+    """
 
-    # Create road network model
-    env = os.getenv("MALIPUT_MALIDRIVE_RESOURCE_ROOT")
-    rn_configuration = {"opendrive_file": env +
-                        "/resources/odr/TShapeRoad.xodr" if env is not None else ""}
-    maliput_road_network = maliput.plugin.create_road_network(
-        "maliput_malidrive", rn_configuration)
-
-    # Sim config
-    sim_config = SimulationConfig(real_time_factor=1.)
-
-    # Create simulation instance
-    sim = Simulation(maliput_road_network, sim_config)
-
-    # Create an agent.
-    # AgentState: name, position, rotation, linear_vel, angular_vel
-    initial_agent_state = AgentInitialState(
-        "agent_1", [0, 0, 0], [0, 0, 0, 1], 0, 0)
-    sim.add_agent(initial_agent_state, agent_controller)
-
-    sim_states = []
-    # Run Simulation for 1 second
-    for i in range(100):
-        sim.step(0.01)
-        sim_states.append(sim.get_sim_state())
+    def __init__(self, type):
+        self.type = type
 
 
-if __name__ == "__main__":
-    main()
+class Pose(Component):
+    """A component that stores a position and rotation."""
+
+    def __init__(self, position, rotation):
+        self.position = position
+        self.rotation = rotation
+
+
+class Velocity(Component):
+    """A component that stores a linear and angular velocity."""
+
+    def __init__(self, linear, angular):
+        self.linear = linear
+        self.angular = angular
+
+
+class Controller(Component):
+    """A component that stores a controller."""
+
+    def __init__(self, controller):
+        self.controller = controller
+
+
+class RoadNetwork(Component):
+    """A component that stores a road network."""
+
+    def __init__(self, road_network):
+        self.road_network = road_network

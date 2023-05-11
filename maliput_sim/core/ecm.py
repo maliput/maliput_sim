@@ -27,57 +27,12 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-class Component:
-    """Base class for components."""
-    pass
-
-
-class Name(Component):
-    """A component that stores a name."""
-    def __init__(self, name):
-        self.name = name
-
-
-class Type(Component):
-    """
-    A component that stores a type.
-    Useful for distinguishing between different types of entities.
-    """
-    def __init__(self, type):
-        self.type = type
-
-
-class Pose(Component):
-    """A component that stores a position and rotation."""
-    def __init__(self, position, rotation):
-        self.position = position
-        self.rotation = rotation
-
-
-class Velocity(Component):
-    """A component that stores a linear and angular velocity."""
-    def __init__(self, linear, angular):
-        self.linear = linear
-        self.angular = angular
-
-
-class Controller(Component):
-    """A component that stores a controller."""
-    def __init__(self, controller):
-        self.controller = controller
-
-
-class RoadNetwork(Component):
-    """A component that stores a road network."""
-    def __init__(self, road_network):
-        self.road_network = road_network
-
-
 class Entity:
     """
     Represents an entity in an Entity Component architecture.
     An entity has an ID and a collection of components.
     """
+
     def __init__(self, entity_id):
         self.entity_id = entity_id
         self.components = {}
@@ -91,6 +46,7 @@ class Entity:
 
 class EntityComponentManager:
     """Manages the entities in the simulation."""
+
     def __init__(self):
         self.next_entity_id = 0
         self.entities = {}
