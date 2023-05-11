@@ -40,5 +40,6 @@
 
 import maliput_sim.core.components as components
 import maliput_sim.core.ecm as ecm
+import maliput_sim.core.utilities as utilities
 
-__all__ = ['components', 'ecm']
+__all__ = ['components', 'ecm', 'utilities']

@@ -27,45 +27,25 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from maliput_sim.core.utilities import *
+import uuid
 
-
-class Entity:
+class IDProvider:
     """
-    Represents an entity in an Entity Component architecture.
-    An entity has an ID and a collection of components.
+    Provides unique IDs.
+    The `uuid` package is used to generate the IDs.
     """
-
-    def __init__(self, entity_id):
-        self._entity_id = entity_id
-        self._components = {}
-
-    def get_id(self):
-        return self._entity_id
-
-    def add_component(self, component):
-        self._components[type(component)] = component
-
-    def get_component(self, component_type):
-        return self._components.get(component_type)
-
-
-class EntityComponentManager:
-    """Manages the entities in the simulation."""
 
     def __init__(self):
-        self.id_provider = IDProvider()
-        self.entities = {}
+        """Constructor."""
+        self._uuids = set()
 
-    def create_entity(self):
-        entity_id = self.id_provider.new_id()
-        entity = Entity(entity_id)
-        self.entities[entity_id] = entity
-        return entity
-
-    def get_entity(self, entity_id):
-        return self.entities[entity_id]
-
-    def get_entities_with_component(self, component_type):
-        return [entity for entity in self.entities.values()
-                if entity.get_component(component_type) is not None]
+    def new_id(self):
+        """
+        Returns a unique ID.
+        The ID is a string.
+        """
+        while True:
+            new_uuid = uuid.uuid4().hex
+            if new_uuid not in self._uuids:
+                self._uuids.add(new_uuid)
+                return new_uuid
