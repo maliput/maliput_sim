@@ -28,14 +28,59 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class Component:
-    """Base class for components."""
-    pass
+    """A base component class that can be added to an entity."""
+    def __init__(self):
+        self.entity = None
+
+    def set_entity(self, entity):
+        self.entity = entity
+
+    def update(self, delta_time, sim_state, entity, ecm):
+        pass
+
+
+class ComponentContainer(Component):
+    """
+    A component that stores other components.
+
+    An example of a component container is a weapon that stores damage, range, and firing rate components.
+    class Weapon(ComponentContainer):
+        def __init__(self):
+            super().__init__()
+            self.add_component(Damage(10))
+            self.add_component(Range(100))
+            self.add_component(FiringRate(5))
+
+        def update(self, delta_time, sim_state, entity, ecm):
+            super().update(delta_time, sim_state, entity, ecm)
+            # additional weapon behavior
+            pass
+    """
+    def __init__(self):
+        super().__init__()
+        self.components = {}
+
+    def add_component(self, component):
+        component_type = type(component)
+        if component_type not in self.components:
+            self.components[component_type] = []
+        self.components[component_type].append(component)
+        component.set_entity(self)
+
+    def get_component(self, component_type):
+        return self.components.get(component_type, [])
+
+    def update(self, delta_time, sim_state, entity, ecm):
+        super().update(delta_time, sim_state, entity, ecm)
+        for component in self.components.values():
+            component.update(delta_time, sim_state, entity, ecm)
 
 
 class Name(Component):
     """A component that stores a name."""
 
     def __init__(self, name):
+        super().__init__()
         self.name = name
 
 
@@ -46,6 +91,7 @@ class Type(Component):
     """
 
     def __init__(self, type):
+        super().__init__()
         self.type = type
 
 
@@ -61,19 +107,26 @@ class Velocity(Component):
     """A component that stores a linear and angular velocity."""
 
     def __init__(self, linear, angular):
+        super().__init__()
         self.linear = linear
         self.angular = angular
 
 
-class Controller(Component):
-    """A component that stores a controller."""
+class Behavior(Component):
+    """A component that stores a behavior."""
 
-    def __init__(self, controller):
-        self.controller = controller
+    def __init__(self, behavior):
+        super().__init__()
+        self.behavior = behavior
+
+    def update(self, delta_time, sim_state, entity, ecm):
+        super().update(delta_time, sim_state, entity, ecm)
+        self.behavior(delta_time, sim_state, entity, ecm)
 
 
 class RoadNetwork(Component):
     """A component that stores a road network."""
 
     def __init__(self, road_network):
+        super().__init__()
         self.road_network = road_network

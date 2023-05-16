@@ -29,6 +29,7 @@
 
 import os
 
+from maliput_sim.core.components import Pose, Velocity
 from maliput_sim.simulation import Simulation, SimulationConfig, AgentInitialState
 
 import maliput.plugin
@@ -37,11 +38,11 @@ import maliput.plugin
 # Controller to be executed for the agent during the step
 def agent_controller(duration, sim_state, entity, ecm):
     """Agent controller."""
-    pose = entity.get_component("pose")
-    velocity = entity.get_component("velocity")
+    pose = entity.get_components(Pose)[0]
+    velocity = entity.get_components(Velocity)[0]
 
     # Move the agent forward in X direction using the current velocity.
-    pose.position[0] += duration * velocity.linear[0]
+    pose.position[0] += duration * velocity.linear
 
 
 def main():
@@ -55,7 +56,7 @@ def main():
         "maliput_malidrive", rn_configuration)
 
     # Sim config
-    sim_config = SimulationConfig(real_time_factor=1.)
+    sim_config = SimulationConfig(real_time_factor=1., time_step=0.01)
 
     # Create simulation instance
     sim = Simulation(maliput_road_network, sim_config)
@@ -63,14 +64,16 @@ def main():
     # Create an agent.
     # AgentState: name, position, rotation, linear_vel, angular_vel
     initial_agent_state = AgentInitialState(
-        "agent_1", [0, 0, 0], [0, 0, 0, 1], 0, 0)
+        "agent_1", [0., 0., 0.], [0., 0., 0., 1], 1., 0.)
     sim.add_agent(initial_agent_state, agent_controller)
 
-    sim_states = []
-    # Run Simulation for 1 second
+    # Run Simulation for 1 second : 100 steps
+    agent_position = sim.get_ecm().get_entities_with_component(Pose)[
+        0].get_components(Pose)[0].position
     for i in range(100):
-        sim.step(0.01)
-        sim_states.append(sim.get_sim_state())
+        sim.step()
+        print("Sim time: ", sim.get_sim_state().sim_time)
+        print("Agent Position: ", agent_position)
 
 
 if __name__ == "__main__":

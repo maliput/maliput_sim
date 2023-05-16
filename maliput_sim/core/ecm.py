@@ -28,44 +28,66 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from maliput_sim.core.utilities import *
+from maliput_sim.core.components import *
 
 
 class Entity:
     """
     Represents an entity in an Entity Component architecture.
-    An entity has an ID and a collection of components.
+    An entity has an ID and a collection of components.\
     """
 
     def __init__(self, entity_id):
+        """Initialize the entity."""
         self._entity_id = entity_id
         self._components = {}
 
-    def get_id(self):
-        return self._entity_id
-
     def add_component(self, component):
-        self._components[type(component)] = component
+        """Add a component to the entity."""
+        component_type = type(component)
+        if component_type not in self._components:
+            self._components[component_type] = []
+        self._components[component_type].append(component)
+        component.set_entity(self)
 
-    def get_component(self, component_type):
-        return self._components.get(component_type)
+    def get_components(self, component_type):
+        """Get all components of the specified type."""
+        return self._components.get(component_type, [])
+
+    def update(self, delta_time, sim_state, ecm):
+        """Update the entity."""
+        for component_list in self._components.values():
+            for component in component_list:
+                component.update(delta_time, sim_state, self, ecm)
 
 
 class EntityComponentManager:
     """Manages the entities in the simulation."""
 
     def __init__(self):
+        """Initialize the entity component manager."""
         self.id_provider = IDProvider()
         self.entities = {}
 
     def create_entity(self):
+        """Create a new entity."""
         entity_id = self.id_provider.new_id()
         entity = Entity(entity_id)
         self.entities[entity_id] = entity
         return entity
 
     def get_entity(self, entity_id):
+        """Get the entity with the specified ID."""
         return self.entities[entity_id]
 
     def get_entities_with_component(self, component_type):
-        return [entity for entity in self.entities.values()
-                if entity.get_component(component_type) is not None]
+        """
+        Get all entities that have a component of the specified type.
+        This method doesn't take into account the components under a component container.
+        """
+        return list(filter(lambda entity: entity.get_components(component_type), self.entities.values()))
+
+    def update(self, delta_time, sim_state):
+        """Updates all entities in the simulation."""
+        for entity in self.entities.values():
+            entity.update(delta_time, sim_state, self)

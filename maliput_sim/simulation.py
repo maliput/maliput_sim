@@ -37,6 +37,8 @@ from maliput_sim.core.ecm import *
 class SimulationConfig:
     """The configuration of the simulation."""
     real_time_factor: float = 1.
+    time_step: float = 0.01
+
 
 @dataclass
 class AgentInitialState:
@@ -46,6 +48,7 @@ class AgentInitialState:
     rotation: list
     linear_vel: float
     angular_vel: float
+
 
 @dataclass
 class SimulationState:
@@ -62,7 +65,7 @@ class Simulation:
             sim_config: The simulation configuration.
 
         """
-        self.sim_state = SimulationState(0.0)
+        self._sim_state = SimulationState(0.0)
         self._entity_component_manager = EntityComponentManager()
 
         # Add the road network to the simulation.
@@ -74,9 +77,6 @@ class Simulation:
         # Saves the simulation configuration.
         self._sim_config = sim_config
 
-        # The list of entities with expected dynamic behavior in the simulation that are expected to be stepped.
-        self._dynamic_entities = []
-
     def add_agent(self, initial_state: AgentInitialState, controller):
         """Adds an agent to the simulation.
 
@@ -87,13 +87,35 @@ class Simulation:
         agent_entity = self._entity_component_manager.create_entity()
         agent_entity.add_component(Name(initial_state.name))
         agent_entity.add_component(Type("agent"))
-        agent_entity.add_component(Pose(initial_state.position, initial_state.rotation))
-        agent_entity.add_component(Velocity(initial_state.linear_vel, initial_state.angular_vel))
-        agent_entity.add_component(Controller(controller))
+        agent_entity.add_component(
+            Pose(initial_state.position, initial_state.rotation))
+        agent_entity.add_component(
+            Velocity(initial_state.linear_vel, initial_state.angular_vel))
+        agent_entity.add_component(Behavior(controller))
 
-        self._dynamic_entities.append(agent_entity)
+    def step(self):
+        """Advances the simulation by one step.
 
-    def step(self, duration):
+        Returns:
+            The new simulation state.
+        """
+        self._entity_component_manager.update(
+            self._sim_config.time_step, self._sim_state)
+        self._sim_state.sim_time += self._sim_config.time_step
+
+    def step_n(self, n):
+        """Advances the simulation by the specified number of steps.
+
+        Args:
+            n: The number of steps to advance the simulation by.
+
+        Returns:
+            The new simulation state.
+        """
+        for _ in range(n):
+            self.step()
+
+    def step_for(self, duration):
         """Advances the simulation by the specified duration.
 
         Args:
@@ -102,11 +124,12 @@ class Simulation:
         Returns:
             The new simulation state.
         """
-        for entity in self._dynamic_entities:
-            controller = entity.get_component(type(Controller))
-            if controller is not None:
-                controller(duration, self.sim_state, entity, self._entity_component_manager)
-        self.sim_state.sim_time += duration
+
+        number_of_steps = int(duration / self._sim_config.time_step)
+        if number_of_steps is 0:
+            number_of_steps = 1
+
+        self.step_n(number_of_steps)
 
     def get_sim_state(self):
         """Returns the current simulation state.
@@ -115,4 +138,12 @@ class Simulation:
             The current simulation state.
         """
         # TODO: Implement this.
-        pass
+        return self._sim_state
+
+    def get_ecm(self):
+        """Returns the entity component manager.
+
+        Returns:
+            The entity component manager.
+        """
+        return self._entity_component_manager
