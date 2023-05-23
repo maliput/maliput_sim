@@ -34,7 +34,7 @@ from maliput_sim.core.components import *
 class Entity:
     """
     Represents an entity in an Entity Component architecture.
-    An entity has an ID and a collection of components.\
+    An entity has an ID and a collection of components.
     """
 
     def __init__(self, entity_id):
