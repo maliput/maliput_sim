@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "maliput-sim"
+name = "maliput_sim"
 version = "0.1.0"
 description = "A lightweight simulator for agent development using maliput."
 authors = ["Franco Cipollone <franco.c@ekumenlabs.com>"]
@@ -10,9 +10,13 @@ packages = [{include = "maliput_sim"}]
 [tool.poetry.dependencies]
 python = "^3.8"
 
-
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.3.1"
+
+[tool.colcon-poetry-ros.data-files]
+"share/maliput_sim" = ["package.xml"]
+
+[tool.poetry.scripts]
 
 [build-system]
 requires = ["poetry-core"]

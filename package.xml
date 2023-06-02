@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>maliput_sim</name>
+  <version>0.1.0</version>
+  <description>Maliput simulator</description>
+  <author email="franco.c@ekumenlabs.com">Franco Cipollone</author>
+  <maintainer email="franco.c@ekumenlabs.com">Franco Cipollone</maintainer>
+  <license file="LICENSE">BSD-3-Clause</license>
+
+  <depend>maliput_py</depend>
+
+</package>
