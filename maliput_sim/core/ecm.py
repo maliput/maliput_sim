@@ -27,8 +27,8 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from maliput_sim.core.utilities import *
-from maliput_sim.core.components import *
+from maliput_sim.core.components import Component
+from maliput_sim.core.utilities import IDProvider
 
 
 class Entity:
@@ -42,7 +42,7 @@ class Entity:
         self._entity_id = entity_id
         self._components = {}
 
-    def add_component(self, component):
+    def add_component(self, component: Component):
         """Add a component to the entity."""
         component_type = type(component)
         if component_type not in self._components:
@@ -50,7 +50,7 @@ class Entity:
         self._components[component_type].append(component)
         component.set_entity(self)
 
-    def get_components(self, component_type):
+    def get_components(self, component_type: type):
         """Get all components of the specified type."""
         return self._components.get(component_type, [])
 
