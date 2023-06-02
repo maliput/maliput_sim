@@ -34,7 +34,7 @@ class IDProvider:
     Provides unique IDs.
     The `uuid` package is used to generate the IDs.
     """
-    _uuids = set()
+    _uuids = set([str])
 
     @classmethod
     def new_id(self):
