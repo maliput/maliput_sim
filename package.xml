@@ -3,7 +3,7 @@
 <package format="3">
   <name>maliput_sim</name>
   <version>0.1.0</version>
-  <description>Maliput simulator</description>
+  <description>A lightweight simulator for agent development using maliput.</description>
   <author email="franco.c@ekumenlabs.com">Franco Cipollone</author>
   <maintainer email="franco.c@ekumenlabs.com">Franco Cipollone</maintainer>
   <license file="LICENSE">BSD-3-Clause</license>
