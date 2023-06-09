@@ -1,0 +1,30 @@
+name: Tox Test
+
+on:
+  push:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:20.04
+    strategy:
+      matrix:
+        python: ["3.8", "3.9", "3.10"]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install pip3
+        run: apt-get update && apt-get install -y python3-pip
+      - name: Install poetry and tox
+        run: pip3 install tox poetry
+      - name: Run tox
+        run: tox
