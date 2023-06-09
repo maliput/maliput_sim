@@ -29,14 +29,15 @@
 
 import math
 
+from typing import Callable
 
-from maliput_sim.core.components import *
-from maliput_sim.core.ecm import *
-from maliput_sim.core.sim import *
+from maliput_sim.core.components import Name, Type, Pose, Velocity, RoadNetwork
+from maliput_sim.core.ecm import Entity, EntityComponentManager
+from maliput_sim.core.sim import Behavior, SimulationConfig, SimulationState, AgentInitialState
 
 
 class Simulation:
-    def __init__(self, road_network, sim_config):
+    def __init__(self, road_network, sim_config: SimulationConfig):
         """Initializes a simulation.
 
         Args:
@@ -56,7 +57,8 @@ class Simulation:
         # Saves the simulation configuration.
         self._sim_config = sim_config
 
-    def add_agent(self, initial_state: AgentInitialState, controller: Callable[[float, SimulationState, Entity, EntityComponentManager], None]):
+    def add_agent(self, initial_state: AgentInitialState,
+                  controller: Callable[[float, SimulationState, Entity, EntityComponentManager], None]):
         """Adds an agent to the simulation.
 
         Args:
