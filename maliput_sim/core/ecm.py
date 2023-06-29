@@ -27,7 +27,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from maliput_sim.core.components import Component
+from maliput_sim.core.components import Component, Type
 from maliput_sim.core.utilities import IDProvider
 
 
@@ -60,6 +60,17 @@ class Entity:
             for component in component_list:
                 component.update(delta_time, sim_state, self, ecm)
 
+    def get_state(self):
+        """Get the state of the entity."""
+        state = {
+            'id': self._entity_id,
+            'components': {}
+        }
+        for component_type, component_list in self._components.items():
+            state['components'][component_type.__name__] = [component.get_state() for component in component_list]
+
+        return state
+
 
 class EntityComponentManager:
     """Manages the entities in the simulation."""
@@ -90,7 +101,18 @@ class EntityComponentManager:
         """
         return list(filter(lambda entity: entity.get_components(component_type), self.entities.values()))
 
+    def get_entities_of_type(self, entity_type):
+        """Get all entities of the specified type."""
+        entities = self.get_entities_with_component(Type)
+        return list(filter(lambda entity: entity.get_components(Type)[0].type == entity_type, entities))
+
     def update(self, delta_time, sim_state):
         """Forward the update() call to all entities."""
         for entity in self.entities.values():
             entity.update(delta_time, sim_state, self)
+
+    def get_state(self):
+        """Get the state of the entity component manager."""
+        return {
+            'entities': [entity.get_state() for entity in self.entities.values()]
+        }

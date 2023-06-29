@@ -27,9 +27,10 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import copy
 import math
 
-from typing import Callable
+from typing import Callable, List
 
 from maliput_sim.core.components import Name, Type, Pose, Velocity, RoadNetwork
 from maliput_sim.core.ecm import Entity, EntityComponentManager
@@ -45,12 +46,16 @@ class Simulation:
             sim_config: The simulation configuration.
 
         """
-        self._sim_state = SimulationState(0.0)
+        self._sim_states = []
+        # TODO(francocipollone): Initial state should contain information about agents initial state as well.
+        self._sim_state = SimulationState(0.0, {})
+        self._sim_states.append(copy.deepcopy(self._sim_state))
+
         self._entity_component_manager = EntityComponentManager()
 
         # Add the road network to the simulation.
         rn_entity = self._entity_component_manager.create_entity()
-        rn_entity.add_component(Name(road_network.road_geometry().id()))
+        rn_entity.add_component(Name(road_network.road_geometry().id().string()))
         rn_entity.add_component(Type("road_network"))
         rn_entity.add_component(RoadNetwork(road_network))
 
@@ -58,11 +63,13 @@ class Simulation:
         self._sim_config = sim_config
 
     def add_agent(self, initial_state: AgentInitialState,
-                  controller: Callable[[float, SimulationState, Entity, EntityComponentManager], None]):
+                  controller: Callable[[float, SimulationState, Entity, EntityComponentManager], None],
+                  get_state: Callable[[], dict]):
         """Adds an agent to the simulation.
 
         Args:
-            agent: The agent to add.
+            controller: Controller to the agent to be executed at each step.
+            get_state: Function that returns a dictionary with any kind of information about the agent.
 
         """
         agent_entity = self._entity_component_manager.create_entity()
@@ -72,7 +79,7 @@ class Simulation:
             Pose(initial_state.position, initial_state.rotation))
         agent_entity.add_component(
             Velocity(initial_state.linear_vel, initial_state.angular_vel))
-        agent_entity.add_component(Behavior(controller))
+        agent_entity.add_component(Behavior(controller, get_state))
 
     def step(self, n=1):
         """Advances the simulation by the specified number of steps.
@@ -80,9 +87,14 @@ class Simulation:
             n: The number of steps to advance the simulation by. By default, 1.
         """
         for _ in range(n):
+            # Update all the entities.
             self._entity_component_manager.update(
                 self._sim_config.time_step, self._sim_state)
+
+            # Update and save the simulation state.
             self._sim_state.sim_time += self._sim_config.time_step
+            self._sim_state.ecm_state = self._entity_component_manager.get_state()
+            self._sim_states.append(copy.deepcopy(self._sim_state))
 
     def step_for(self, duration):
         """Advances the simulation by the specified duration.
@@ -96,14 +108,21 @@ class Simulation:
 
         self.step(n=number_of_steps)
 
-    def get_sim_state(self):
+    def get_sim_state(self) -> SimulationState:
         """Returns the current simulation state.
 
         Returns:
             The current simulation state.
         """
-        # TODO: Implement this.
         return self._sim_state
+
+    def get_sim_states(self) -> List[SimulationState]:
+        """Returns all the states of the simulation so far.
+
+        Returns:
+            A list with all the states of the simulation.
+        """
+        return self._sim_states
 
     def get_ecm(self):
         """Returns the entity component manager.
@@ -112,3 +131,16 @@ class Simulation:
             The entity component manager.
         """
         return self._entity_component_manager
+
+    def get_road_network(self):
+        """Returns the road network.
+
+        Returns:
+            The road network.
+        """
+        rn_entities = self._entity_component_manager.get_entities_with_component(RoadNetwork)
+        if rn_entities is None:
+            return None
+        road_network_component = rn_entities[0].get_components(RoadNetwork)[0]
+
+        return road_network_component.road_network
