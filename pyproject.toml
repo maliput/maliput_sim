@@ -9,6 +9,9 @@ packages = [{include = "maliput_sim"}]
 
 [tool.poetry.dependencies]
 python = "^3.8.1"
+foxglove-schemas-protobuf = "^0.1.0"
+mcap-protobuf-support = "^0.3.0"
+types-protobuf = "^4.23.0.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.3.1"

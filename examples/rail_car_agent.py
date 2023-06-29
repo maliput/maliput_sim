@@ -30,6 +30,7 @@
 import os
 
 from maliput_sim.core.sim import SimulationConfig, AgentInitialState
+from maliput_sim.export.mcap import MCAP
 from maliput_sim.simulation import Simulation
 
 import maliput.plugin
@@ -79,10 +80,11 @@ def main():
     print("Running...")
     sim.step_for(30)
 
-    # Inspect the simulation state
-    states = sim.get_sim_states()
-    print("Simulation states: ", states)
-
+    # Export simulation
+    export = MCAP(simulation=sim, output_file_path="rail_car_agent_mcap.mcap")
+    export.dump(export_agent_param=True,
+                export_road_network_param=True,
+                export_signals=['id', 'lane_id', 'lane_position', 'inertial_position'])
 
 if __name__ == "__main__":
     main()
