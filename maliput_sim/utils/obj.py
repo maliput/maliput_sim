@@ -28,19 +28,23 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import os
+from tempfile import gettempdir
 
+from maliput.api import RoadNetwork
 import maliput.utility
 
-
-def generate_obj_file_from_road_network(road_network):
-    """Generates an obj file from a road network.
-    The temporary location of the file is /tmp/maliput_sim/road_network.obj
+def generate_obj_file_from_road_network(road_network: RoadNetwork, output_directory=None):
     """
-    tmp_directory = "/tmp/maliput_sim"
+    Generates an obj file from a road network.
+    Args:
+        road_network: A maliput road network.
+        output_directory: The output directory where the obj file will be saved.(optional)
+    """
+    out_dir = output_directory if output_directory is not None else gettempdir() + "/maliput_sim"
     # Check if the directory exists
-    if not os.path.exists(tmp_directory):
+    if not os.path.exists(out_dir):
         # If it doesn't exist, create it
-        os.makedirs(tmp_directory)
+        os.makedirs(out_dir)
 
     # Create obj
     obj_features = maliput.utility.ObjFeatures()
@@ -50,11 +54,11 @@ def generate_obj_file_from_road_network(road_network):
     obj_features.draw_branch_points = False
     obj_features.draw_lane_haze = False
     maliput.utility.GenerateObjFile(
-        road_network, tmp_directory, "road_network", obj_features)
-    return tmp_directory + "/road_network.obj"
+        road_network, out_dir, "road_network", obj_features)
+    return out_dir + "/road_network.obj"
 
 
-def get_obj_description_from_road_network(road_network):
+def get_obj_description_from_road_network(road_network: RoadNetwork):
     """Returns the obj description from a road network."""
     obj_filepath = generate_obj_file_from_road_network(road_network)
     with open(obj_filepath, "r") as f:
