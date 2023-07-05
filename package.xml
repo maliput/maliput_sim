@@ -10,4 +10,6 @@
 
   <depend>maliput_py</depend>
 
+  <test_depend>ament_index_python</test_depend>
+
 </package>
