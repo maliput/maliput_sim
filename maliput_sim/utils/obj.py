@@ -40,7 +40,7 @@ def generate_obj_file_from_road_network(road_network: RoadNetwork, output_direct
         road_network: A maliput road network.
         output_directory: The output directory where the obj file will be saved.(optional)
     """
-    out_dir = output_directory if output_directory is not None else gettempdir() + "/maliput_sim"
+    out_dir = output_directory if output_directory else gettempdir() + "/maliput_sim"
     # Check if the directory exists
     if not os.path.exists(out_dir):
         # If it doesn't exist, create it
