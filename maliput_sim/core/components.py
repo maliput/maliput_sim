@@ -131,6 +131,9 @@ class Velocity(Component):
         self.linear = linear
         self.angular = angular
 
+    def get_state(self):
+        return self.linear + self.angular
+
 
 class RoadNetwork(Component):
     """A component that stores a road network."""
@@ -140,6 +143,5 @@ class RoadNetwork(Component):
         self.road_network = road_network
 
     def get_state(self):
-        # TODO: Evaluate if this is the best way to store the maliput road network. RoadNetwork is stateless
-        #       and probably doesn't need to be stored in the ECM.
+        # TODO: Evaluate if this is the best way to store the maliput road network.
         return None
