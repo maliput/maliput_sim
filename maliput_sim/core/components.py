@@ -83,9 +83,7 @@ class ComponentContainer(Component):
     def get_state(self):
         state = {}
         for component_type, component_list in self.components.items():
-            state[component_type.__name__] = []
-            for component in component_list:
-                state[component_type.__name__].append(component.get_state())
+            state[component_type.__name__] = [c.get_state() for c in component_list]
         return state
 
 
