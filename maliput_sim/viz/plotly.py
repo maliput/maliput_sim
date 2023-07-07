@@ -29,7 +29,7 @@
 
 from maliput_sim.simulation import Simulation
 from maliput_sim.utils.obj import generate_obj_file_from_road_network
-from maliput_sim.viz.base import Visualization
+from maliput_sim.viz.base import Visualizer
 
 import pywavefront
 import plotly.graph_objects as go
@@ -49,7 +49,10 @@ def get_vertices_and_faces_from_road_network(road_network):
     return get_vertices_and_faces_from_obj(obj_filepath)
 
 
-class Plotly(Visualization):
+class Plotly(Visualizer):
+    _TRACE_WIDTH = 5
+    _ROAD_NETWORK_COLOR = 'lightblue'
+
     """A Plotly visualization."""
     def __init__(self, simulation: Simulation):
         self._simulation = simulation
@@ -74,7 +77,7 @@ class Plotly(Visualization):
             i=[f[0] for f in faces],
             j=[f[1] for f in faces],
             k=[f[2] for f in faces],
-            color='lightblue',  # Customize the color if desired
+            color=self._ROAD_NETWORK_COLOR,
             name=road_network.road_geometry().id().string(),
         )
 
@@ -108,7 +111,7 @@ class Plotly(Visualization):
                 name=agent_name,
                 mode='lines',
                 line=dict(
-                    width=5
+                    width=self._TRACE_WIDTH
                 )
             )
             self._fig.add_trace(scatter)

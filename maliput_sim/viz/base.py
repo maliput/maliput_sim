@@ -32,7 +32,7 @@ from abc import ABC, abstractmethod
 from maliput_sim.simulation import Simulation
 
 
-class Visualization(ABC):
+class Visualizer(ABC):
     """Base class for visualizations."""
 
     def __init__(self, simulation: Simulation):
