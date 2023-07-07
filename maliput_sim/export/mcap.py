@@ -49,14 +49,14 @@ class MCAP(Exporter):
 
     _DEFAULT_SIMULATION_OUTPUT_FILE_PATH = "simulation.mcap"
 
-    _AGENT_BOX_SIZE = [4, 2, 1.5]
-    _AGENT_COLOR = [1, 0, 0, 0.8]
+    _AGENT_BOX_SIZE = Vector3(x=4, y=2, z=1.5)
+    _AGENT_COLOR = Color(r=1, g=0, b=0, a=0.8)
 
     _ROAD_NETWORK_ID = "road_network"
-    _ROAD_NETWORK_COLOR = [0.2, 0.8, 0.9, 0.1]
-    _ROAD_NETWORK_MODEL_OFFSET = [0, 0, 0]
-    _ROAD_NETWORK_MODEL_ROTATION = [-0.70710678118, 0, 0, 0.70710678118]
-    _ROAD_NETWORK_SCALE = [1, 1, 1]
+    _ROAD_NETWORK_COLOR = Color(r=0.2, g=0.8, b=0.9, a=0.1)
+    _ROAD_NETWORK_MODEL_OFFSET = Vector3(x=0, y=0, z=0)
+    _ROAD_NETWORK_MODEL_ROTATION = Quaternion(x=-0.70710678118, y=0, z=0, w=0.70710678118)
+    _ROAD_NETWORK_SCALE = Vector3(x=1, y=1, z=1)
 
     _ROOT_FRAME_ID = "map"
     _MEDIA_TYPE = "model/obj"
@@ -83,19 +83,13 @@ class MCAP(Exporter):
         entity.id = self._ROAD_NETWORK_ID
 
         entity.models.add(
-            color=Color(r=self._ROAD_NETWORK_COLOR[0], g=self._ROAD_NETWORK_COLOR[1],
-                        b=self._ROAD_NETWORK_COLOR[2], a=self._ROAD_NETWORK_COLOR[3]),
+            color=self._ROAD_NETWORK_COLOR,
             override_color=True,
             pose=Pose(
-                position=Vector3(x=self._ROAD_NETWORK_MODEL_OFFSET[0],
-                                 y=self._ROAD_NETWORK_MODEL_OFFSET[1],
-                                 z=self._ROAD_NETWORK_MODEL_OFFSET[2]),
-                orientation=Quaternion(x=self._ROAD_NETWORK_MODEL_ROTATION[0],
-                                       y=self._ROAD_NETWORK_MODEL_ROTATION[1],
-                                       z=self._ROAD_NETWORK_MODEL_ROTATION[2],
-                                       w=self._ROAD_NETWORK_MODEL_ROTATION[3])
+                position=self._ROAD_NETWORK_MODEL_OFFSET,
+                orientation=self._ROAD_NETWORK_MODEL_ROTATION
             ),
-            scale=Vector3(x=self._ROAD_NETWORK_SCALE[0], y=self._ROAD_NETWORK_SCALE[1], z=self._ROAD_NETWORK_SCALE[2]),
+            scale=self._ROAD_NETWORK_SCALE,
             media_type=self._MEDIA_TYPE,
             data=obj_description
         )
@@ -107,15 +101,13 @@ class MCAP(Exporter):
         entity.id = agent_name
         entity.frame_id = self._ROOT_FRAME_ID
         entity.cubes.add(
-            size=Vector3(
-                x=self._AGENT_BOX_SIZE[0], y=self._AGENT_BOX_SIZE[1], z=self._AGENT_BOX_SIZE[2]),
+            size=self._AGENT_BOX_SIZE,
             pose=Pose(
                 position=Vector3(x=pose[0], y=pose[1], z=pose[2]),
                 orientation=Quaternion(
                     x=pose[3], y=pose[4], z=pose[5], w=pose[6])
             ),
-            color=Color(r=self._AGENT_COLOR[0], g=self._AGENT_COLOR[1],
-                        b=self._AGENT_COLOR[2], a=self._AGENT_COLOR[3]),
+            color=self._AGENT_COLOR,
         )
 
     def dump(self,
