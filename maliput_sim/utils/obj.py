@@ -33,6 +33,7 @@ from tempfile import gettempdir
 from maliput.api import RoadNetwork
 import maliput.utility
 
+
 def generate_obj_file_from_road_network(road_network: RoadNetwork, output_directory=None):
     """
     Generates an obj file from a road network.
