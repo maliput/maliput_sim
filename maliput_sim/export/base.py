@@ -43,5 +43,6 @@ class Exporter(ABC):
              export_agent_param: bool = True,
              export_road_network_param: bool = True,
              init_timestamp: float = 0.,
+             end_timestamp: float = 0.,
              export_signals: List = []):
         pass

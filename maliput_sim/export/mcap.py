@@ -114,6 +114,7 @@ class MCAP(Exporter):
              export_agent_param: bool = True,
              export_road_network_param: bool = True,
              init_timestamp: float = 0.,
+             end_timestamp: float = 0.,
              export_signals: List = []):
         """
         Dump the simulation states into an mcap file.
@@ -123,15 +124,19 @@ class MCAP(Exporter):
             export_agent_param: If True, the agent information will be exported.
             export_road_network_param: If True, the road network information will be exported.
             init_timestamp: The initial timestamp of the simulation in seconds.
-            export_signals: TBD
+            end_timestamp: The end timestamp of the simulation in seconds.
+                           If 0, the simulation will be dumped until the end.
+            export_signals: List of controller signals to export.
         """
-
+        init_timestamp_ns = int(init_timestamp * 1e9)
+        end_timestamp_ns = int(end_timestamp * 1e9)
+        if end_timestamp_ns != 0 and end_timestamp_ns < init_timestamp_ns:
+            raise ValueError("end_timestamp must be equal or greater than init_timestamp")
         with open(self._output_file_path, "wb") as f, Writer(f) as writer:
             scene_update = SceneUpdate()
             sim_states = self._simulation.get_sim_states()
 
-            init_timestamp_ns = int(init_timestamp * 1e9) if init_timestamp is not None else 0
-            sim_time_ns = int(sim_states[0].sim_time * 1e9) + init_timestamp_ns
+            sim_time_ns = int(sim_states[0].sim_time * 1e9)
             if (export_road_network_param):
                 self._add_road_network_entity_to_scene(self._simulation.get_road_network(), scene_update, sim_time_ns)
             writer.write_message(
@@ -145,7 +150,14 @@ class MCAP(Exporter):
                 if (sim_state.ecm_state is None):
                     continue
 
-                sim_time_ns = int(sim_state.sim_time * 1e9) + init_timestamp_ns
+                sim_time_ns = int(sim_state.sim_time * 1e9)
+                # Skip if sim_time is smaller than init_timestamp
+                if (sim_time_ns < init_timestamp_ns):
+                    continue
+                # Stop if sim_time is greater than end_timestamp
+                if (end_timestamp_ns != 0 and sim_time_ns > end_timestamp_ns):
+                    break
+
                 scene_update = SceneUpdate()
                 entities = sim_state.ecm_state['entities']
                 if (export_agent_param):
