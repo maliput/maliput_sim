@@ -1,0 +1,77 @@
+name: poetry runs
+
+on:
+  push:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  ROS_DISTRO: foxy
+  ROS_WS: maliput_ws
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:20.04
+    strategy:
+      matrix:
+        python: ["3.8", "3.9", "3.10"]
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ros-tooling/setup-ros@v0.6
+
+      - name: poetry install
+        shell: bash
+        run: pip3 install poetry
+      # TODO(francocipollone): Once https://github.com/UrbanMachine/colcon-poetry-ros/pull/38 is merged we can point to the official colcon-poetry-ros.
+      - name: colcon-poetry-ros install
+        shell: bash
+        run: pip3 install 'colcon-poetry-ros @ git+https://github.com/francocipollone/colcon-poetry-ros.git@francocipollone/package_deps'
+
+      # Build and install maliput dependencies.
+      - uses: ros-tooling/action-ros-ci@v0.3
+        id: action_ros_ci_step
+        with:
+          package-name: maliput maliput_py maliput_malidrive maliput_sim
+          target-ros2-distro: ${{ env.ROS_DISTRO }}
+          vcs-repo-file-url: ${GITHUB_WORKSPACE}/.github/dependencies.repos
+          extra-cmake-args: -DBUILD_TESTING=False
+          skip-tests: true
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python }}
+
+      # Run checks
+      - name: Run poetry check
+        shell: bash
+        run: |
+          poetry check
+
+      - name: Run poetry install
+        shell: bash
+        run: |
+          poetry install
+
+      - name: Run pytest
+        shell: bash
+        run: |
+          . /opt/ros/${{ env.ROS_DISTRO }}/setup.bash;
+          . ${{ steps.action_ros_ci_step.outputs.ros-workspace-directory-name }}/install/setup.bash;
+          poetry run pytest test/ -v;
+
+      - name: Run flake8
+        shell: bash
+        run: |
+          poetry run flake8 maliput_sim test
+
+      - name: Run mypy
+        shell: bash
+        run: |
+          poetry run mypy maliput_sim

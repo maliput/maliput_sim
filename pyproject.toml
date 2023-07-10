@@ -23,3 +23,7 @@ flake8 = "^6.0.0"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[colcon-package]
+exec_depend = ["maliput_py"]
+test_depend = ["maliput_malidrive"]
