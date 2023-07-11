@@ -30,6 +30,7 @@
 import os
 
 from maliput_sim.core.sim import SimulationConfig, AgentInitialState
+from maliput_sim.export.mcap import MCAP
 from maliput_sim.simulation import Simulation
 from maliput_sim.viz.plotly import Plotly
 
@@ -80,9 +81,17 @@ def main():
     print("Running...")
     sim.step_for(30)
 
-    # Use plotly to visualize the simulation
+    print("Exporting...")
+    # Export simulation
+    export = MCAP(simulation=sim, output_file_path="rail_car_agent_mcap.mcap")
+    export.dump(export_agent_param=True,
+                export_road_network_param=True,
+                export_signals=['id', 'lane_id', 'lane_position', 'inertial_position'])
+
+    print("Visualizing...")
     viz = Plotly(sim)
     viz.show()
+
 
 if __name__ == "__main__":
     main()
