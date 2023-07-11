@@ -54,6 +54,7 @@ class AgentInitialState:
 class SimulationState:
     """The state of the simulation."""
     sim_time: float
+    ecm_state: dict
 
 
 class Behavior(Component):
@@ -61,16 +62,23 @@ class Behavior(Component):
     The behavior is callable with the same interface as update() and implements
     their own logic after this component's parent update() finishes."""
 
-    def __init__(self, behavior: Callable[[float, SimulationState, Entity, EntityComponentManager], None]):
+    def __init__(self,
+                 behavior: Callable[[float, SimulationState, Entity, EntityComponentManager], None],
+                 get_state: Callable[[], dict] = lambda: {}):
         """Constructs a behavior component.
         Args: behavior: The behavior to be called during update().
 
         TODO(francocipollone): Use typing.TypeAlias when moving to Python 3.10 for better readability.
         """
         super().__init__()
-        self.behavior = behavior
+        self._behavior = behavior
+        self._get_state = get_state
 
     def update(self, delta_time, sim_state, entity, ecm):
         """Calls the behavior after the parent update() finishes."""
         super().update(delta_time, sim_state, entity, ecm)
-        self.behavior(delta_time, sim_state, entity, ecm)
+        self._behavior(delta_time, sim_state, entity, ecm)
+
+    def get_state(self):
+        """Returns the state of the behavior."""
+        return self._get_state()

@@ -39,6 +39,9 @@ class Component:
     def update(self, delta_time, sim_state, entity, ecm):
         pass
 
+    def get_state(self):
+        return None
+
 
 class ComponentContainer(Component):
     """
@@ -77,6 +80,12 @@ class ComponentContainer(Component):
         for component in self.components.values():
             component.update(delta_time, sim_state, entity, ecm)
 
+    def get_state(self):
+        state = {}
+        for component_type, component_list in self.components.items():
+            state[component_type.__name__] = [c.get_state() for c in component_list]
+        return state
+
 
 class Name(Component):
     """A component that stores a name."""
@@ -84,6 +93,9 @@ class Name(Component):
     def __init__(self, name):
         super().__init__()
         self.name = name
+
+    def get_state(self):
+        return self.name
 
 
 class Type(Component):
@@ -96,6 +108,9 @@ class Type(Component):
         super().__init__()
         self.type = type
 
+    def get_state(self):
+        return self.type
+
 
 class Pose(Component):
     """A component that stores a position and rotation."""
@@ -103,6 +118,9 @@ class Pose(Component):
     def __init__(self, position, rotation):
         self.position = position
         self.rotation = rotation
+
+    def get_state(self):
+        return self.position + self.rotation
 
 
 class Velocity(Component):
@@ -113,6 +131,9 @@ class Velocity(Component):
         self.linear = linear
         self.angular = angular
 
+    def get_state(self):
+        return self.linear + self.angular
+
 
 class RoadNetwork(Component):
     """A component that stores a road network."""
@@ -120,3 +141,7 @@ class RoadNetwork(Component):
     def __init__(self, road_network):
         super().__init__()
         self.road_network = road_network
+
+    def get_state(self):
+        # TODO: Evaluate if this is the best way to store the maliput road network.
+        return None
