@@ -8,9 +8,10 @@
   <maintainer email="franco.c@ekumenlabs.com">Franco Cipollone</maintainer>
   <license file="LICENSE">BSD-3-Clause</license>
 
-  <depend>maliput_py</depend>
+  <exec_depend>ament_index_python</exec_depend>
+  <exec_depend>maliput_py</exec_depend>
 
-  <test_depend>ament_index_python</test_depend>
+  <test_depend>maliput_malidrive</test_depend>
   <test_depend>python3-pytest</test_depend>
 
   <export>
