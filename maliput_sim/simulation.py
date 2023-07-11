@@ -141,4 +141,6 @@ class Simulation:
         rn_entities = self._entity_component_manager.get_entities_with_component(RoadNetwork)
         if rn_entities is None:
             return None
-        return rn_entities[0].get_components(RoadNetwork)[0].road_network
+        road_network_component = rn_entities[0].get_components(RoadNetwork)[0]
+
+        return road_network_component.road_network
