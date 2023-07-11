@@ -31,6 +31,7 @@ import os
 
 from maliput_sim.core.sim import SimulationConfig, AgentInitialState
 from maliput_sim.simulation import Simulation
+from maliput_sim.viz.plotly import Plotly
 
 import maliput.plugin
 import maliput.utility
@@ -79,10 +80,9 @@ def main():
     print("Running...")
     sim.step_for(30)
 
-    # Inspect the simulation state
-    states = sim.get_sim_states()
-    print("Simulation states: ", states)
-
+    # Use plotly to visualize the simulation
+    viz = Plotly(sim)
+    viz.show()
 
 if __name__ == "__main__":
     main()

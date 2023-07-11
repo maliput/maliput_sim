@@ -27,6 +27,8 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import os
+
 from enum import Enum
 
 from maliput.api import Lane, LanePosition, InertialPosition, Which
@@ -38,8 +40,7 @@ class RailCarController():
         FORWARD = "0"
         BACKWARD = "1"
 
-    _LANE_DIRECTION_TO_INT_MAP = {LaneDirection.FORWARD: 1, LaneDirection.BACKWARD: -1}
-    _LANE_END_TO_LANE_DIRECTION_MAP = {Which.kStart: LaneDirection.FORWARD, Which.kFinish: LaneDirection.BACKWARD}
+    _LANE_DIRECTION_TO_INT_MAP = { LaneDirection.FORWARD: 1, LaneDirection.BACKWARD: -1 }
 
     def __init__(self):
         self._lane_direction = RailCarController.LaneDirection.FORWARD
@@ -52,7 +53,7 @@ class RailCarController():
         pose = entity.get_components(Pose)[0]
         velocity = entity.get_components(Velocity)[0]
 
-        # Move the agent forward in _s_ direction using the current velocity.
+        # Move the agent forward in X direction using the current velocity.
 
         rn_entity = ecm.get_entities_of_type("road_network")[0]
         rn = rn_entity.get_components(RoadNetwork)[0].road_network
@@ -70,7 +71,7 @@ class RailCarController():
                 road_position.lane, self._lane_direction)
             if (new_lane_end is None):
                 return
-            self._lane_direction = self._LANE_END_TO_LANE_DIRECTION_MAP.get(new_lane_end.end)
+            self._lane_direction = RailCarController.LaneDirection.FORWARD if new_lane_end.end == Which.kStart else RailCarController.LaneDirection.BACKWARD
             self._lane = new_lane_end.lane
             new_s = 0 if self._lane_direction == RailCarController.LaneDirection.FORWARD else self._lane.length()
 
@@ -94,5 +95,6 @@ class RailCarController():
         return state
 
     def _get_next_lane_end(lane, lane_direction):
-        return lane.GetDefaultBranch(
+        default_branch = lane.GetDefaultBranch(
             Which.kFinish if lane_direction == RailCarController.LaneDirection.FORWARD else Which.kStart)
+        return default_branch
