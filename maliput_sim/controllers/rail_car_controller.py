@@ -39,7 +39,7 @@ class RailCarController():
         BACKWARD = "1"
 
     _LANE_DIRECTION_TO_INT_MAP = {LaneDirection.FORWARD: 1, LaneDirection.BACKWARD: -1}
-    _LANE_END_TO_LANE_DIRECTION_MAP = {Which.kStart: LaneDirection.FORWARD, Which.kEnd: LaneDirection.BACKWARD}
+    _LANE_END_TO_LANE_DIRECTION_MAP = {Which.kStart: LaneDirection.FORWARD, Which.kFinish: LaneDirection.BACKWARD}
 
     def __init__(self):
         self._lane_direction = RailCarController.LaneDirection.FORWARD
@@ -95,4 +95,4 @@ class RailCarController():
 
     def _get_next_lane_end(lane, lane_direction):
         return lane.GetDefaultBranch(
-            Which.kEnd if lane_direction == RailCarController.LaneDirection.FORWARD else Which.kStart)
+            Which.kFinish if lane_direction == RailCarController.LaneDirection.FORWARD else Which.kStart)
