@@ -36,7 +36,7 @@ from maliput_sim.viz.plotly import Plotly
 import maliput.plugin
 import maliput.utility
 
-from controllers import RailCarController
+from maliput_sim.controllers.rail_car_controller import RailCarController
 
 def main():
     """Main entry point."""

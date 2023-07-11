@@ -27,41 +27,17 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import os
-from tempfile import gettempdir
 
-from maliput.api import RoadNetwork
-import maliput.utility
+##############################################################################
+# Documentation
+##############################################################################
 
+"""Subpackage holding the controllers maliput_sim functionality."""
 
-def generate_obj_file_from_road_network(road_network: RoadNetwork, output_directory=None):
-    """
-    Generates an obj file from a road network.
-    Args:
-        road_network: A maliput road network.
-        output_directory: The output directory where the obj file will be saved.(optional)
-    """
-    out_dir = output_directory if output_directory else gettempdir() + "/maliput_sim"
-    # Check if the directory exists
-    if not os.path.exists(out_dir):
-        # If it doesn't exist, create it
-        os.makedirs(out_dir)
+##############################################################################
+# Imports
+##############################################################################
 
-    # Create obj
-    obj_features = maliput.utility.ObjFeatures()
-    obj_features.draw_arrows = False
-    obj_features.draw_stripes = True
-    obj_features.draw_elevation_bounds = False
-    obj_features.draw_branch_points = False
-    obj_features.draw_lane_haze = False
-    maliput.utility.GenerateObjFile(
-        road_network, out_dir, "road_network", obj_features)
-    return out_dir + "/road_network.obj"
+import maliput_sim.controllers.rail_car_controller as rail_car_controller
 
-
-def get_obj_description_from_road_network(road_network: RoadNetwork):
-    """Returns the obj description from a road network."""
-    obj_filepath = generate_obj_file_from_road_network(road_network)
-    with open(obj_filepath, "r") as f:
-        obj_description = f.read()
-    return obj_description
+__all__ = ['rail_car_controller']

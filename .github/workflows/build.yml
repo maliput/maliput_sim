@@ -23,9 +23,13 @@ jobs:
     - name: poetry install
       shell: bash
       run: pip3 install poetry
+      # TODO(francocipollone): Once https://github.com/UrbanMachine/colcon-poetry-ros/pull/41 is merged we can point to the official colcon-poetry-ros.
     - name: colcon-poetry-ros install
       shell: bash
-      run: pip3 install colcon-poetry-ros
+      run: pip3 install 'colcon-poetry-ros @ git+https://github.com/francocipollone/colcon-poetry-ros.git@francocipollone/fix_deps'
+    - name: install package's poetry dependencies
+      shell: bash
+      run: python3 -m colcon_poetry_ros.dependencies.install --base-paths  ${GITHUB_WORKSPACE}/../
     - uses: ros-tooling/action-ros-ci@v0.3
       id: action_ros_ci_step
       with:
