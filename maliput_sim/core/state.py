@@ -26,60 +26,11 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 from dataclasses import dataclass
-from typing import Callable
-
-from maliput_sim.core.components import Component
-from maliput_sim.core.ecm import Entity, EntityComponentManager
-from maliput_sim.core.state import SimulationState
-
-
-@dataclass
-class SimulationConfig:
-    """The configuration of the simulation."""
-    real_time_factor: float = 1.
-    time_step: float = 0.01
-
-
-@dataclass
-class AgentInitialState:
-    """The initial state of an agent in the simulation."""
-    name: str
-    position: list
-    rotation: list
-    linear_vel: float
-    angular_vel: float
-
 
 @dataclass
 class SimulationState:
     """The state of the simulation."""
     sim_time: float
     ecm_state: dict
-
-
-class Behavior(Component):
-    """A component that stores a behavior.
-    The behavior is callable with the same interface as update() and implements
-    their own logic after this component's parent update() finishes."""
-
-    def __init__(self,
-                 behavior: Callable[[float, SimulationState, Entity, EntityComponentManager], None],
-                 get_state: Callable[[], dict] = lambda: {}):
-        """Constructs a behavior component.
-        Args: behavior: The behavior to be called during update().
-
-        TODO(francocipollone): Use typing.TypeAlias when moving to Python 3.10 for better readability.
-        """
-        super().__init__()
-        self._behavior = behavior
-        self._get_state = get_state
-
-    def update(self, delta_time, sim_state, entity, ecm):
-        """Calls the behavior after the parent update() finishes."""
-        super().update(delta_time, sim_state, entity, ecm)
-        self._behavior(delta_time, sim_state, entity, ecm)
-
-    def get_state(self):
-        """Returns the state of the behavior."""
-        return self._get_state()
