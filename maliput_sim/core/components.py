@@ -37,7 +37,7 @@ class Component:
     def __init__(self):
         self.entity = None
 
-    def set_entity(self, entity: Entity):
+    def set_entity(self, entity: 'Entity'):
         """
         Set the entity that this component belongs to.
 
@@ -47,7 +47,7 @@ class Component:
         """
         self.entity = entity
 
-    def update(self, delta_time: float, sim_state: SimulationState, entity: Entity, ecm: EntityComponentManager):
+    def update(self, delta_time: float, sim_state: 'SimulationState', entity: 'Entity', ecm: 'EntityComponentManager'):
         """
         Update the component.
 
@@ -113,7 +113,7 @@ class ComponentContainer(Component):
         """
         return self.components.get(component_type, [])
 
-    def update(self, delta_time: float, sim_state: SimulationState, entity: Entity, ecm: EntityComponentManager):
+    def update(self, delta_time: float, sim_state: 'SimulationState', entity: 'Entity', ecm: 'EntityComponentManager'):
         """
         Updates all the components in the container.
 
