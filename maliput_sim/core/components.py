@@ -31,7 +31,8 @@ from typing import List
 
 import maliput_sim
 
-from maliput_py import RoadNetwork as MaliputRoadNetwork
+from maliput.api import RoadNetwork as MaliputRoadNetwork
+
 
 class Component:
     """A base component class that can be added to an entity."""
@@ -49,7 +50,10 @@ class Component:
         """
         self._entity = entity
 
-    def update(self, delta_time: float, sim_state: 'maliput_sim.core.sim.SimulationState', entity: 'maliput_sim.core.ecm.Entity', ecm: 'maliput_sim.core.ecm.EntityComponentManager'):
+    def update(self, delta_time: float,
+               sim_state: 'maliput_sim.core.sim.SimulationState',
+               entity: 'maliput_sim.core.ecm.Entity',
+               ecm: 'maliput_sim.core.ecm.EntityComponentManager'):
         """
         Update the component.
 
@@ -115,7 +119,10 @@ class ComponentContainer(Component):
         """
         return self._components.get(component_type, [])
 
-    def update(self, delta_time: float, sim_state: 'maliput_sim.core.sim.SimulationState', entity: 'maliput_sim.core.ecm.Entity', ecm: 'maliput_sim.core.ecm.EntityComponentManager'):
+    def update(self, delta_time: float,
+               sim_state: 'maliput_sim.core.sim.SimulationState',
+               entity: 'maliput_sim.core.ecm.Entity',
+               ecm: 'maliput_sim.core.ecm.EntityComponentManager'):
         """
         Updates all the components in the container.
 
@@ -218,6 +225,7 @@ class Velocity(Component):
 
     def get_angular_vel(self):
         return self._angular
+
 
 class RoadNetwork(Component):
     """A component that stores a road network."""

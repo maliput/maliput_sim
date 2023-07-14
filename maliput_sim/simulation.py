@@ -36,6 +36,7 @@ from maliput_sim.core.components import Name, Type, Pose, Velocity, RoadNetwork
 from maliput_sim.core.ecm import Entity, EntityComponentManager
 from maliput_sim.core.sim import AgentInitialState, Behavior, SimulationConfig, SimulationState
 
+
 class Simulation:
     def __init__(self, road_network, sim_config: SimulationConfig):
         """Initializes a simulation.
