@@ -34,8 +34,7 @@ from typing import Callable, List
 
 from maliput_sim.core.components import Name, Type, Pose, Velocity, RoadNetwork
 from maliput_sim.core.ecm import Entity, EntityComponentManager
-from maliput_sim.core.sim import Behavior, SimulationConfig, AgentInitialState
-from maliput_sim.core.state import SimulationState
+from maliput_sim.core.sim import AgentInitialState, Behavior, SimulationConfig, SimulationState
 
 class Simulation:
     def __init__(self, road_network, sim_config: SimulationConfig):
@@ -78,7 +77,7 @@ class Simulation:
         agent_entity.add_component(
             Pose(initial_state.position, initial_state.rotation))
         agent_entity.add_component(
-            Velocity(initial_state.linear_vel, initial_state.angular_vel))
+            Velocity([initial_state.linear_vel, 0, 0], [0, 0, initial_state.angular_vel]))
         agent_entity.add_component(Behavior(controller, get_state))
 
     def step(self, n=1):
@@ -143,4 +142,4 @@ class Simulation:
             return None
         road_network_component = rn_entities[0].get_components(RoadNetwork)[0]
 
-        return road_network_component.road_network
+        return road_network_component.get_road_network()

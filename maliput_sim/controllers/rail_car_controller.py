@@ -55,13 +55,13 @@ class RailCarController():
         # Move the agent forward in _s_ direction using the current velocity.
 
         rn_entity = ecm.get_entities_of_type("road_network")[0]
-        rn = rn_entity.get_components(RoadNetwork)[0].road_network
+        rn = rn_entity.get_components(RoadNetwork)[0].get_road_network()
         rg = rn.road_geometry()
         road_position_result = rg.ToRoadPosition(InertialPosition(
-            pose.position[0], pose.position[1], pose.position[2]))
+            pose.get_position()[0], pose.get_position()[1], pose.get_position()[2]))
         road_position = road_position_result.road_position
 
-        s_increment = duration * velocity.linear
+        s_increment = duration * velocity.get_linear_vel()[0]
 
         self._lane = road_position.lane
         new_s = road_position.pos.s() + self._LANE_DIRECTION_TO_INT_MAP.get(self._lane_direction) * s_increment
@@ -77,13 +77,15 @@ class RailCarController():
         self._lane_position = LanePosition(new_s, 0., 0.)
         self._inertial_position = self._lane.ToInertialPosition(self._lane_position)
         new_orientation = self._lane.GetOrientation(self._lane_position).quat()
-        pose.position[0] = self._inertial_position.x()
-        pose.position[1] = self._inertial_position.y()
-        pose.position[2] = self._inertial_position.z()
-        pose.rotation[0] = new_orientation.x()
-        pose.rotation[1] = new_orientation.y()
-        pose.rotation[2] = new_orientation.z()
-        pose.rotation[3] = new_orientation.w()
+        position = pose.get_position()
+        rotation = pose.get_rotation()
+        position[0] = self._inertial_position.x()
+        position[1] = self._inertial_position.y()
+        position[2] = self._inertial_position.z()
+        rotation[0] = new_orientation.x()
+        rotation[1] = new_orientation.y()
+        rotation[2] = new_orientation.z()
+        rotation[3] = new_orientation.w()
 
     def get_state(self):
         state = {}

@@ -27,6 +27,8 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+from typing import List
+
 from maliput_sim.core.components import Component, Type
 from maliput_sim.core.utilities import IDProvider
 
@@ -50,7 +52,7 @@ class Entity:
         self._components[component_type].append(component)
         component.set_entity(self)
 
-    def get_components(self, component_type: type):
+    def get_components(self, component_type: type) -> List[Component]:
         """Get all components of the specified type."""
         return self._components.get(component_type, [])
 
@@ -104,7 +106,7 @@ class EntityComponentManager:
     def get_entities_of_type(self, entity_type):
         """Get all entities of the specified type."""
         entities = self.get_entities_with_component(Type)
-        return list(filter(lambda entity: entity.get_components(Type)[0].type == entity_type, entities))
+        return list(filter(lambda entity: entity.get_components(Type)[0].get_type() == entity_type, entities))
 
     def update(self, delta_time, sim_state):
         """Forward the update() call to all entities."""

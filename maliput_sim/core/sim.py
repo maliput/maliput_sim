@@ -31,7 +31,6 @@ from typing import Callable
 
 from maliput_sim.core.components import Component
 from maliput_sim.core.ecm import Entity, EntityComponentManager
-from maliput_sim.core.state import SimulationState
 
 
 @dataclass
