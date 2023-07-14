@@ -27,10 +27,12 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from typing import List
+from typing import List, Dict, Any
 
 from maliput_sim.core.components import Component, Type
 from maliput_sim.core.utilities import IDProvider
+
+import maliput_sim
 
 
 class Entity:
@@ -39,10 +41,10 @@ class Entity:
     An entity has an ID and a collection of components.
     """
 
-    def __init__(self, entity_id):
+    def __init__(self, entity_id: str):
         """Initialize the entity."""
         self._entity_id = entity_id
-        self._components = {}
+        self._components: Dict[type, List[Component]] = {}
 
     def add_component(self, component: Component):
         """Add a component to the entity."""
@@ -56,15 +58,17 @@ class Entity:
         """Get all components of the specified type."""
         return self._components.get(component_type, [])
 
-    def update(self, delta_time, sim_state, ecm):
+    def update(self, delta_time: float,
+               sim_state: 'maliput_sim.core.sim.SimulationState',
+               ecm: 'EntityComponentManager') -> None:
         """Update the entity."""
         for component_list in self._components.values():
             for component in component_list:
                 component.update(delta_time, sim_state, self, ecm)
 
-    def get_state(self):
+    def get_state(self) -> Dict[str, Any]:
         """Get the state of the entity."""
-        state = {
+        state: Dict[str, Any] = {
             'id': self._entity_id,
             'components': {}
         }
