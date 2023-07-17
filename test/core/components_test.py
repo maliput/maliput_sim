@@ -40,10 +40,10 @@ class MockComponent(Component):
     def __init__(self, state=None):
         super().__init__()
         self._state = state
-        self._nr_updates = 0
+        self._num_updates = 0
 
     def update(self, delta_time, sim_state, entity, ecm):
-        self._nr_updates += 1
+        self._num_updates += 1
 
     def get_state(self):
         return self._state
@@ -68,9 +68,9 @@ class TestComponent(unittest.TestCase, TestComponentBase):
         sim_state = SimulationState(self._SIM_TIME, {})
         entity = Entity(self._ENTITY_ID)
         ecm = EntityComponentManager()
-        self.assertEqual(component._nr_updates, 0)
+        self.assertEqual(component._num_updates, 0)
         component.update(delta_time, sim_state, entity, ecm)
-        self.assertEqual(component._nr_updates, 1)
+        self.assertEqual(component._num_updates, 1)
 
     def test_get_state(self):
         component = MockComponent()
@@ -117,8 +117,8 @@ class TestComponentContainer(unittest.TestCase, TestComponentBase):
         entity = Entity(self._ENTITY_ID)
         ecm = EntityComponentManager()
         container.update(delta_time, sim_state, entity, ecm)
-        self.assertEqual(component._nr_updates, 1)
-        self.assertEqual(another_component._nr_updates, 1)
+        self.assertEqual(component._num_updates, 1)
+        self.assertEqual(another_component._num_updates, 1)
 
     def test_get_state(self):
         container = ComponentContainer()
@@ -171,37 +171,42 @@ class TestType(unittest.TestCase):
 
 
 class TestPose(unittest.TestCase):
+    _POSITION = [1, 2, 3]
+    _ROTATION = [4, 5, 6, 7]
+
     def setUp(self):
-        self._position = (1, 2, 3)
-        self._rotation = (4, 5, 6)
-        self._dut = Pose(self._position, self._rotation)
+        self._dut = Pose(self._POSITION, self._ROTATION)
         return super().setUp()
 
     def test_get_position(self):
-        self.assertEqual(self._dut.get_position(), self._position)
+        self.assertEqual(self._dut.get_position(), self._POSITION)
+
+    def test_get_rotation(self):
+        self.assertEqual(self._dut.get_rotation(), self._ROTATION)
 
     def test_get_state(self):
         state = self._dut.get_state()
-        expected_state = self._position + self._rotation
+        expected_state = self._POSITION + self._ROTATION
         self.assertEqual(state, expected_state)
 
 
 class TestVelocity(unittest.TestCase):
+    _LINEAR_VELOCITY = [1, 2, 3]
+    _ANGULAR_VELOCITY = [4, 5, 6]
+
     def setUp(self):
-        self._linear_velocity = (1, 2, 3)
-        self._angular_velocity = (4, 5, 6)
-        self._dut = Velocity(self._linear_velocity, self._angular_velocity)
+        self._dut = Velocity(self._LINEAR_VELOCITY, self._ANGULAR_VELOCITY)
         return super().setUp()
 
     def test_get_linear_velocity(self):
-        self.assertEqual(self._dut.get_linear_vel(), self._linear_velocity)
+        self.assertEqual(self._dut.get_linear_vel(), self._LINEAR_VELOCITY)
 
     def test_get_angular_velocity(self):
-        self.assertEqual(self._dut.get_angular_vel(), self._angular_velocity)
+        self.assertEqual(self._dut.get_angular_vel(), self._ANGULAR_VELOCITY)
 
     def test_get_state(self):
         state = self._dut.get_state()
-        expected_state = self._linear_velocity + self._angular_velocity
+        expected_state = self._LINEAR_VELOCITY + self._ANGULAR_VELOCITY
         self.assertEqual(state, expected_state)
 
 
