@@ -46,7 +46,6 @@ class Component:
 
         Args:
             entity: The entity that this component belongs to.
-
         """
         self._entity = entity
 
@@ -69,7 +68,7 @@ class Component:
         """
         Get the current state of the component.
         """
-        return None
+        pass
 
 
 class ComponentContainer(Component):
