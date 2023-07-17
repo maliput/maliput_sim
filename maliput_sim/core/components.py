@@ -27,20 +27,48 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+from typing import List
+
+import maliput_sim
+
+from maliput.api import RoadNetwork as MaliputRoadNetwork
+
+
 class Component:
     """A base component class that can be added to an entity."""
 
     def __init__(self):
-        self.entity = None
+        self._entity = None
 
-    def set_entity(self, entity):
-        self.entity = entity
+    def set_entity(self, entity: 'maliput_sim.core.ecm.Entity'):
+        """
+        Set the entity that this component belongs to.
 
-    def update(self, delta_time, sim_state, entity, ecm):
+        Args:
+            entity: The entity that this component belongs to.
+        """
+        self._entity = entity
+
+    def update(self, delta_time: float,
+               sim_state: 'maliput_sim.core.sim.SimulationState',
+               entity: 'maliput_sim.core.ecm.Entity',
+               ecm: 'maliput_sim.core.ecm.EntityComponentManager'):
+        """
+        Update the component.
+
+        Args:
+            delta_time: The amount of time that has passed since the last update.
+            sim_state: The current simulation state.
+            entity: The entity that this component belongs to.
+            ecm: The entity component manager.
+        """
         pass
 
     def get_state(self):
-        return None
+        """
+        Get the current state of the component.
+        """
+        pass
 
 
 class ComponentContainer(Component):
@@ -63,26 +91,60 @@ class ComponentContainer(Component):
 
     def __init__(self):
         super().__init__()
-        self.components = {}
+        self._components = {}
 
-    def add_component(self, component):
+    def add_component(self, component: Component):
+        """
+        Add a component to the container.
+
+        Args:
+            component: The component to add to the container.
+        """
         component_type = type(component)
-        if component_type not in self.components:
-            self.components[component_type] = []
-        self.components[component_type].append(component)
-        component.set_entity(self)
+        if component_type not in self._components:
+            self._components[component_type] = []
+        self._components[component_type].append(component)
+        component.set_entity(self._entity)
 
-    def get_component(self, component_type):
-        return self.components.get(component_type, [])
+    def get_component(self, component_type: type):
+        """
+        Get the list of components of the specified type.
 
-    def update(self, delta_time, sim_state, entity, ecm):
+        Args:
+            component_type: The type of component to get.
+
+        Returns:
+            A list of components of the specified type.
+        """
+        return self._components.get(component_type, [])
+
+    def update(self, delta_time: float,
+               sim_state: 'maliput_sim.core.sim.SimulationState',
+               entity: 'maliput_sim.core.ecm.Entity',
+               ecm: 'maliput_sim.core.ecm.EntityComponentManager'):
+        """
+        Updates all the components in the container.
+
+        Args:
+            delta_time: The amount of time that has passed since the last update.
+            sim_state: The current simulation state.
+            entity: The entity that this component belongs to.
+            ecm: The entity component manager.
+        """
         super().update(delta_time, sim_state, entity, ecm)
-        for component in self.components.values():
+        for component in self._components.values():
             component.update(delta_time, sim_state, entity, ecm)
 
     def get_state(self):
+        """
+        Get the current state of the component container.
+        Each component in the container will have its own state.
+        The state of the component container is a dictionary of the states of each component.
+        The keys of the dictionary are the type names of the components. And the value of each key is a list of the
+        states of the components of that type.
+        """
         state = {}
-        for component_type, component_list in self.components.items():
+        for component_type, component_list in self._components.items():
             state[component_type.__name__] = [c.get_state() for c in component_list]
         return state
 
@@ -90,12 +152,12 @@ class ComponentContainer(Component):
 class Name(Component):
     """A component that stores a name."""
 
-    def __init__(self, name):
+    def __init__(self, name: str):
         super().__init__()
-        self.name = name
+        self._name = name
 
-    def get_state(self):
-        return self.name
+    def get_state(self) -> str:
+        return self._name
 
 
 class Type(Component):
@@ -104,43 +166,81 @@ class Type(Component):
     Useful for distinguishing between different types of entities.
     """
 
-    def __init__(self, type):
+    def __init__(self, type: str):
         super().__init__()
-        self.type = type
+        self._type = type
 
-    def get_state(self):
-        return self.type
+    def get_state(self) -> str:
+        return self._type
+
+    def get_type(self) -> str:
+        return self._type
 
 
 class Pose(Component):
     """A component that stores a position and rotation."""
 
-    def __init__(self, position, rotation):
-        self.position = position
-        self.rotation = rotation
+    def __init__(self, position: List[float], rotation: List[float]):
+        """
+        Initialize the pose component.
 
-    def get_state(self):
-        return self.position + self.rotation
+        Args:
+            position: The position of the entity: [x y z].
+            rotation: The rotation of the entity in quaternion format: [x y z w].
+        """
+        self._position = position
+        self._rotation = rotation
+
+    def get_state(self) -> list:
+        return self._position + self._rotation
+
+    def get_position(self) -> list:
+        return self._position
+
+    def get_rotation(self) -> list:
+        return self._rotation
 
 
 class Velocity(Component):
     """A component that stores a linear and angular velocity."""
 
-    def __init__(self, linear, angular):
+    def __init__(self, linear: List['float'], angular: List['float']):
+        """
+        Initialize the velocity component.
+
+        Args:
+            linear: The linear velocity of the entity: [x y z].
+            angular: The angular velocity of the entity around each axis: [x y z].
+        """
         super().__init__()
-        self.linear = linear
-        self.angular = angular
+        self._linear = linear
+        self._angular = angular
 
     def get_state(self):
-        return self.linear + self.angular
+        return self._linear + self._angular
+
+    def get_linear_vel(self):
+        return self._linear
+
+    def get_angular_vel(self):
+        return self._angular
 
 
 class RoadNetwork(Component):
     """A component that stores a road network."""
 
-    def __init__(self, road_network):
+    def __init__(self, road_network: MaliputRoadNetwork):
+        """
+        Initialize the road network component.
+
+        Args:
+            road_network: The maliput road network.
+        """
         super().__init__()
-        self.road_network = road_network
+        self._road_network = road_network
+
+    def get_road_network(self) -> MaliputRoadNetwork:
+        return self._road_network
 
     def get_state(self):
         # TODO: Evaluate if this is the best way to store the maliput road network.
