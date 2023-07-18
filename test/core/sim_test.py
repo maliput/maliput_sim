@@ -29,8 +29,7 @@
 
 import unittest
 from unittest.mock import MagicMock
-from maliput_sim.core.sim import (Behavior, SimulationConfig,
-                         SimulationState, AgentInitialState)
+from maliput_sim.core.sim import (Behavior, SimulationConfig, SimulationState, AgentInitialState)
 
 
 class TestSimulationConfig(unittest.TestCase):
@@ -66,6 +65,7 @@ class TestSimulationState(unittest.TestCase):
 
         self.assertEqual(sim_state.sim_time, 10.0)
         self.assertEqual(sim_state.ecm_state, ecm_state)
+
 
 class TestBehavior(unittest.TestCase):
 
