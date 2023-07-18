@@ -64,7 +64,7 @@ class Simulation:
 
     def add_agent(self, initial_state: AgentInitialState,
                   controller: Callable[[float, SimulationState, Entity, EntityComponentManager], None],
-                  get_state: Callable[[], dict]):
+                  get_state: Callable[[], dict] = lambda: {}):
         """Adds an agent to the simulation.
 
         Args:
@@ -123,6 +123,15 @@ class Simulation:
             A list with all the states of the simulation.
         """
         return self._sim_states
+
+    def get_sim_config(self) -> SimulationConfig:
+        """
+        Returns the simulation configuration.
+
+        Returns:
+            The simulation configuration.
+        """
+        return self._sim_config
 
     def get_ecm(self):
         """Returns the entity component manager.
