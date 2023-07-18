@@ -42,12 +42,22 @@ class Entity:
     """
 
     def __init__(self, entity_id: str):
-        """Initialize the entity."""
+        """
+        Initialize the entity.
+
+        Args:
+            entity_id: The ID of the entity.
+        """
         self._entity_id = entity_id
         self._components: Dict[type, List[Component]] = {}
 
     def add_component(self, component: Component):
-        """Add a component to the entity."""
+        """
+        Add a component to the entity.
+
+        Args:
+            component: The component to add.
+        """
         component_type = type(component)
         if component_type not in self._components:
             self._components[component_type] = []
@@ -55,19 +65,39 @@ class Entity:
         component.set_entity(self)
 
     def get_components(self, component_type: type) -> List[Component]:
-        """Get all components of the specified type."""
+        """
+        Get all components of the specified type.
+
+        Args:
+            component_type: The type of component to get.
+
+        Returns:
+            A list of all components of the specified type.
+        """
         return self._components.get(component_type, [])
 
     def update(self, delta_time: float,
                sim_state: 'maliput_sim.core.sim.SimulationState',
                ecm: 'EntityComponentManager') -> None:
-        """Update the entity."""
+        """
+        Update the entity.
+
+        Args:
+            delta_time: The amount of time that has passed since the last update.
+            sim_state: The current state of the simulation.
+            ecm: The entity component manager.
+        """
         for component_list in self._components.values():
             for component in component_list:
                 component.update(delta_time, sim_state, self, ecm)
 
     def get_state(self) -> Dict[str, Any]:
-        """Get the state of the entity."""
+        """
+        Get the state of the entity.
+
+        Returns:
+            The state of the entity in a dictionary.
+        """
         state: Dict[str, Any] = {
             'id': self._entity_id,
             'components': {}
@@ -85,40 +115,83 @@ class EntityComponentManager:
         """Initialize the entity component manager."""
         self.entities = {}
 
-    def create_entity(self):
-        """Create a new entity."""
+    def create_entity(self) -> Entity:
+        """
+        Create a new entity.
+
+        Returns:
+            The newly created entity.
+        """
         entity_id = IDProvider.new_id()
         entity = Entity(entity_id)
         self.entities[entity_id] = entity
         return entity
 
-    def get_entities(self):
-        """Get all entities."""
+    def get_entities(self) -> List[Entity]:
+        """
+        Get all entities.
+
+        Returns:
+            A list of all entities.
+        """
         return self.entities
 
-    def get_entity(self, entity_id):
-        """Get the entity with the specified ID."""
+    def get_entity(self, entity_id: str) -> Entity:
+        """
+        Get the entity with the specified ID.
+
+        Args:
+            entity_id: The ID of the entity to get.
+
+        Returns:
+            The entity with the specified ID.
+        """
         return self.entities[entity_id]
 
-    def get_entities_with_component(self, component_type):
+    def get_entities_with_component(self, component_type: type) -> List[Entity]:
         """
         Get all entities that have a component of the specified type.
         This method doesn't take into account the components under a component container.
+
+        Args:
+            component_type: The type of component to look for.
+
+        Returns:
+            A list of all entities that have a component of the specified type.
         """
         return list(filter(lambda entity: entity.get_components(component_type), self.entities.values()))
 
-    def get_entities_of_type(self, entity_type):
-        """Get all entities of the specified type."""
-        entities = self.get_entities_with_component(Type)
-        return list(filter(lambda entity: entity.get_components(Type)[0].get_type() == entity_type, entities))
+    def get_entities_of_type(self, entity_type: str) -> List[Entity]:
+        """
+        Get all entities with a component of the specified type.
 
-    def update(self, delta_time, sim_state):
-        """Forward the update() call to all entities."""
+        Args:
+            entity_type: The type value of the Type component to look for.
+
+        Returns:
+            A list of all entities with a component of the specified type.
+        """
+        entities = self.get_entities_with_component(Type)
+        return list(filter(lambda entity: entity.get_components(Type)[0].get_state() == entity_type, entities))
+
+    def update(self, delta_time: float, sim_state: 'maliput_sim.core.sim.SimulationState'):
+        """
+        Forward the update() call to all entities.
+
+        Args:
+            delta_time: The amount of time that has passed since the last update.
+            sim_state: The current state of the simulation.
+        """
         for entity in self.entities.values():
             entity.update(delta_time, sim_state, self)
 
     def get_state(self):
-        """Get the state of the entity component manager."""
+        """
+        Get the state of the entity component manager.
+
+        Returns:
+            The state of the entity component manager in a dictionary.
+        """
         return {
             'entities': [entity.get_state() for entity in self.entities.values()]
         }
