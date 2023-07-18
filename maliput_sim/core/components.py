@@ -132,8 +132,9 @@ class ComponentContainer(Component):
             ecm: The entity component manager.
         """
         super().update(delta_time, sim_state, entity, ecm)
-        for component in self._components.values():
-            component.update(delta_time, sim_state, entity, ecm)
+        for component_list in self._components.values():
+            for component in component_list:
+                component.update(delta_time, sim_state, entity, ecm)
 
     def get_state(self):
         """
@@ -157,6 +158,9 @@ class Name(Component):
         self._name = name
 
     def get_state(self) -> str:
+        return self._name
+
+    def get_name(self) -> str:
         return self._name
 
 
