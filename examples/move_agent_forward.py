@@ -42,7 +42,7 @@ def agent_controller(duration, sim_state, entity, ecm):
     velocity = entity.get_components(Velocity)[0]
 
     # Move the agent forward in X direction using the current velocity.
-    pose.position[0] += duration * velocity.linear
+    pose._position[0] += duration * velocity.get_linear_vel()[0]
 
 
 def main():
@@ -69,7 +69,7 @@ def main():
 
     # Run Simulation for 1 second : 100 steps
     agent_position = sim.get_ecm().get_entities_with_component(Pose)[
-        0].get_components(Pose)[0].position
+        0].get_components(Pose)[0].get_position()
     for i in range(100):
         sim.step()
         print("Sim time: ", sim.get_sim_state().sim_time)
