@@ -172,7 +172,7 @@ class EntityComponentManager:
             A list of all entities with a component of the specified type.
         """
         entities = self.get_entities_with_component(Type)
-        return list(filter(lambda entity: entity.get_components(Type)[0].get_type() == entity_type, entities))
+        return list(filter(lambda entity: entity.get_components(Type)[0].get_state() == entity_type, entities))
 
     def update(self, delta_time: float, sim_state: 'maliput_sim.core.sim.SimulationState'):
         """
