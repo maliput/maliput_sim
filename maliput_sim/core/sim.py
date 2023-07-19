@@ -27,7 +27,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 from dataclasses import dataclass
-from typing import Callable
+from typing import Any, Callable, Dict
 
 from maliput_sim.core.components import Component
 from maliput_sim.core.ecm import Entity, EntityComponentManager
@@ -64,9 +64,11 @@ class Behavior(Component):
 
     def __init__(self,
                  behavior: Callable[[float, SimulationState, Entity, EntityComponentManager], None],
-                 get_state: Callable[[], dict] = lambda: {}):
+                 get_state: Callable[[], Dict[str, Any]] = lambda: {}):
         """Constructs a behavior component.
-        Args: behavior: The behavior to be called during update().
+        Args:
+            behavior: The behavior to be called during update().
+            get_state: A function that returns the state of the behavior.
 
         TODO(francocipollone): Use typing.TypeAlias when moving to Python 3.10 for better readability.
         """
@@ -74,9 +76,19 @@ class Behavior(Component):
         self._behavior = behavior
         self._get_state = get_state
 
-    def update(self, delta_time, sim_state, entity, ecm):
-        """Calls the behavior after the parent update() finishes."""
-        super().update(delta_time, sim_state, entity, ecm)
+    def update(self, delta_time: float,
+               sim_state: SimulationState,
+               entity: Entity,
+               ecm: EntityComponentManager):
+        """
+        Calls the behavior function.
+
+        Args:
+            delta_time: The amount of time that has passed since the last update.
+            sim_state: The state of the simulation.
+            entity: The entity that this component belongs to.
+            ecm: The entity component manager.
+        """
         self._behavior(delta_time, sim_state, entity, ecm)
 
     def get_state(self):
