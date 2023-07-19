@@ -92,7 +92,7 @@ class TestSimulation(unittest.TestCase):
         self.assertEqual(len(entities), 1)
         agent_entity = entities[0]
         agent_pose = agent_entity.get_components(Pose)[0].get_state()
-        self.assertAlmostEqual(agent_pose[0], 0.2)  # Linear x position after 1 step
+        self.assertAlmostEqual(agent_pose[0], 0.2)  # Linear x position after one step
 
     def test_step_for(self):
         self._add_agent("Agent1")
@@ -130,12 +130,11 @@ class TestSimulation(unittest.TestCase):
         # Move the agent forward in X direction using the current velocity.
         pose._position[0] += duration * velocity.get_linear_vel()[0]
 
-    def _dumb_get_state(self):
-        return {"key": "value"}
-
     def _add_agent(self, name):
+        def dumb_get_state():
+            return {"key": "value"}
         initial_state = AgentInitialState(name=name, position=[0, 0, 0],
                                           rotation=[0, 0, 0, 0], linear_vel=2., angular_vel=0.)
         controller = self._move_forward_controller
-        get_state = self._dumb_get_state
+        get_state = dumb_get_state
         self.simulation.add_agent(initial_state, controller, get_state)
