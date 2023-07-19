@@ -95,40 +95,40 @@ class TestEntity(unittest.TestCase):
 class TestEntityComponentManager(unittest.TestCase):
 
     def setUp(self):
-        self.ecm = EntityComponentManager()
+        self.dut = EntityComponentManager()
 
     def test_create_entity(self):
-        entity = self.ecm.create_entity()
+        entity = self.dut.create_entity()
         self.assertIsInstance(entity, Entity)
         self.assertIsNotNone(entity._entity_id)  # Ensure entity ID is assigned
 
     def test_get_entities(self):
-        entities = self.ecm.get_entities()
+        entities = self.dut.get_entities()
         self.assertEqual(len(entities), 0)
 
-        entity1 = self.ecm.create_entity()
-        entity2 = self.ecm.create_entity()
+        entity1 = self.dut.create_entity()
+        entity2 = self.dut.create_entity()
 
-        entities = self.ecm.get_entities()
+        entities = self.dut.get_entities()
         self.assertEqual(len(entities), 2)
         self.assertIn(entity1._entity_id, entities)
         self.assertIn(entity2._entity_id, entities)
 
     def test_get_entity(self):
-        entity1 = self.ecm.create_entity()
-        entity2 = self.ecm.create_entity()
+        entity1 = self.dut.create_entity()
+        entity2 = self.dut.create_entity()
 
-        retrieved_entity1 = self.ecm.get_entity(entity1._entity_id)
-        retrieved_entity2 = self.ecm.get_entity(entity2._entity_id)
+        retrieved_entity1 = self.dut.get_entity(entity1._entity_id)
+        retrieved_entity2 = self.dut.get_entity(entity2._entity_id)
 
         self.assertEqual(entity1, retrieved_entity1)
         self.assertEqual(entity2, retrieved_entity2)
 
     def test_get_entities_with_component(self):
-        component_type = MagicMock()
-        entity1 = self.ecm.create_entity()
-        entity2 = self.ecm.create_entity()
-        entity3 = self.ecm.create_entity()
+        component_type = type(MagicMock())
+        entity1 = self.dut.create_entity()
+        entity2 = self.dut.create_entity()
+        entity3 = self.dut.create_entity()
 
         entity1.get_components = MagicMock(return_value=[MagicMock()])
         entity2.get_components = MagicMock(return_value=[])
@@ -136,33 +136,31 @@ class TestEntityComponentManager(unittest.TestCase):
         print(entity1.get_components())
         print(entity2.get_components())
         print(entity3.get_components())
-        entities_with_component = self.ecm.get_entities_with_component(component_type)
+        entities_with_component = self.dut.get_entities_with_component(component_type)
         self.assertEqual(len(entities_with_component), 2)
         self.assertIn(entity1, entities_with_component)
         self.assertIn(entity3, entities_with_component)
 
     def test_get_entities_of_type(self):
+        entity1 = self.dut.create_entity()
         entity_type = "TestType"
+        entity1.add_component(Type(entity_type))
+
+        entity2 = self.dut.create_entity()
         different_entity_type = "DifferentType"
-        type_component = Type(entity_type)
-
-        entity1 = self.ecm.create_entity()
-        entity1.add_component(type_component)
-
-        entity2 = self.ecm.create_entity()
         entity2.add_component(Type(different_entity_type))
 
-        entity3 = self.ecm.create_entity()
+        entity3 = self.dut.create_entity()
 
-        entities_of_type = self.ecm.get_entities_of_type(entity_type)
+        entities_of_type = self.dut.get_entities_of_type(entity_type)
         self.assertEqual(len(entities_of_type), 1)
         self.assertIn(entity1, entities_of_type)
         self.assertNotIn(entity2, entities_of_type)
         self.assertNotIn(entity3, entities_of_type)
 
     def test_update(self):
-        entity1 = self.ecm.create_entity()
-        entity2 = self.ecm.create_entity()
+        entity1 = self.dut.create_entity()
+        entity2 = self.dut.create_entity()
 
         entity1.update = MagicMock()
         entity2.update = MagicMock()
@@ -170,18 +168,18 @@ class TestEntityComponentManager(unittest.TestCase):
         delta_time = 0.1
         sim_state = MagicMock()
 
-        self.ecm.update(delta_time, sim_state)
+        self.dut.update(delta_time, sim_state)
 
-        entity1.update.assert_called_once_with(delta_time, sim_state, self.ecm)
-        entity2.update.assert_called_once_with(delta_time, sim_state, self.ecm)
+        entity1.update.assert_called_once_with(delta_time, sim_state, self.dut)
+        entity2.update.assert_called_once_with(delta_time, sim_state, self.dut)
 
     def test_get_state(self):
-        entity1 = self.ecm.create_entity()
+        entity1 = self.dut.create_entity()
         entity1.get_state = MagicMock(return_value={"state": "entity1"})
-        entity2 = self.ecm.create_entity()
+        entity2 = self.dut.create_entity()
         entity2.get_state = MagicMock(return_value={"state": "entity2"})
 
-        state = self.ecm.get_state()
+        state = self.dut.get_state()
         self.assertEqual(len(state['entities']), 2)
         self.assertIn({"state": "entity1"}, state['entities'])
         self.assertIn({"state": "entity2"}, state['entities'])
