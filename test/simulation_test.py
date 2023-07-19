@@ -41,25 +41,25 @@ class TestSimulation(unittest.TestCase):
     def setUp(self):
         self.road_network = MagicMock()
         self.sim_config = SimulationConfig(real_time_factor=1.0, time_step=0.1)
-        self.simulation = Simulation(self.road_network, self.sim_config)
+        self.dut = Simulation(self.road_network, self.sim_config)
 
     def test_init(self):
         # Check if the simulation state is initialized correctly
-        sim_state = self.simulation.get_sim_state()
+        sim_state = self.dut.get_sim_state()
         self.assertEqual(sim_state.sim_time, 0.0)
         self.assertEqual(sim_state.ecm_state, {})
 
         # Check if the simulation config is initialized correctly
-        sim_config = self.simulation.get_sim_config()
+        sim_config = self.dut.get_sim_config()
         self.assertEqual(sim_config.real_time_factor, 1.0)
         self.assertEqual(sim_config.time_step, 0.1)
 
         # Check if the road network is initialized correctly
-        road_network = self.simulation.get_road_network()
+        road_network = self.dut.get_road_network()
         self.assertEqual(road_network, self.road_network)
 
         # Check ecm is initialized correctly
-        ecm = self.simulation.get_ecm()
+        ecm = self.dut.get_ecm()
         self.assertIsInstance(ecm, EntityComponentManager)
         self.assertEqual(len(ecm.get_entities()), 1)
         self.assertEqual(len(ecm.get_entities_of_type(self._ROAD_NETWORK_TYPE)), 1)
@@ -67,7 +67,7 @@ class TestSimulation(unittest.TestCase):
     def test_add_agent(self):
         self._add_agent("Agent1")
 
-        ecm = self.simulation.get_ecm()
+        ecm = self.dut.get_ecm()
         self.assertEqual(len(ecm.get_entities()), 2)
 
         agent_entity = ecm.get_entities_of_type("agent")[0]
@@ -78,16 +78,16 @@ class TestSimulation(unittest.TestCase):
         self._add_agent("Agent1")
 
         # Simulating one step
-        self.simulation.step()
+        self.dut.step()
 
         # Check if the simulation state is updated
-        sim_state = self.simulation.get_sim_state()
+        sim_state = self.dut.get_sim_state()
         self.assertAlmostEqual(sim_state.sim_time, 0.1)
         self.assertEqual(len(sim_state.ecm_state), 1)
         self.assertIn("entities", sim_state.ecm_state)
 
         # Check if the agent's state is updated
-        ecm = self.simulation.get_ecm()
+        ecm = self.dut.get_ecm()
         entities = ecm.get_entities_of_type(self._AGENT_TYPE)
         self.assertEqual(len(entities), 1)
         agent_entity = entities[0]
@@ -98,14 +98,14 @@ class TestSimulation(unittest.TestCase):
         self._add_agent("Agent1")
 
         # Simulating for 2 seconds
-        self.simulation.step_for(duration=2.0)
+        self.dut.step_for(duration=2.0)
 
         # Check if the simulation state is updated
-        sim_state = self.simulation.get_sim_state()
+        sim_state = self.dut.get_sim_state()
         self.assertAlmostEqual(sim_state.sim_time, 2.0)
 
         # Check if the agent's state is updated
-        ecm = self.simulation.get_ecm()
+        ecm = self.dut.get_ecm()
         entities = ecm.get_entities_of_type(self._AGENT_TYPE)
         self.assertEqual(len(entities), 1)
         agent_entity = entities[0]
@@ -116,10 +116,10 @@ class TestSimulation(unittest.TestCase):
         self._add_agent("Agent1")
 
         # Simulating for 2 seconds
-        self.simulation.step_for(duration=2.0)
+        self.dut.step_for(duration=2.0)
 
         # Check if all the states of the simulation are returned
-        sim_states = self.simulation.get_sim_states()
+        sim_states = self.dut.get_sim_states()
         self.assertEqual(len(sim_states), 21)  # 20 steps + initial state
 
     def _move_forward_controller(self, duration, sim_state, entity, ecm):
@@ -137,4 +137,4 @@ class TestSimulation(unittest.TestCase):
                                           rotation=[0, 0, 0, 0], linear_vel=2., angular_vel=0.)
         controller = self._move_forward_controller
         get_state = dumb_get_state
-        self.simulation.add_agent(initial_state, controller, get_state)
+        self.dut.add_agent(initial_state, controller, get_state)
