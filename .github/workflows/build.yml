@@ -27,12 +27,26 @@ jobs:
     - name: colcon-poetry-ros install
       shell: bash
       run: pip3 install 'colcon-poetry-ros @ git+https://github.com/francocipollone/colcon-poetry-ros.git@francocipollone/fix_deps'
-    - name: install package's poetry dependencies
-      shell: bash
-      run: python3 -m colcon_poetry_ros.dependencies.install --base-paths  ${GITHUB_WORKSPACE}/../
     - uses: ros-tooling/action-ros-ci@v0.3
       id: action_ros_ci_step
       with:
         package-name: ${{ env.PACKAGE_NAME }}
         target-ros2-distro: ${{ env.ROS_DISTRO }}
         vcs-repo-file-url: ${GITHUB_WORKSPACE}/.github/dependencies.repos
+        skip-tests: true
+    # Install package's poetry dependencies
+    # action_ros_ci action wipes the workspace in every run, so we need to install the python dependencies
+    # after the build and run the tests separetly.
+    - name: install package's poetry dependencies
+      shell: bash
+      run: python3 -m colcon_poetry_ros.dependencies.install --base-paths ${GITHUB_WORKSPACE}/../ --install-base ${{ steps.action_ros_ci_step.outputs.ros-workspace-directory-name }}/install
+    - name: colcon test
+      shell: bash
+      working-directory: ${{ steps.action_ros_ci_step.outputs.ros-workspace-directory-name }}
+      run: |
+        . /opt/ros/${{ env.ROS_DISTRO }}/setup.bash;
+        colcon test --packages-select ${{ env.PACKAGE_NAME }} --event-handlers console_direct+;
+    - name: colcon test-result
+      shell: bash
+      working-directory: ${{ steps.action_ros_ci_step.outputs.ros-workspace-directory-name }}
+      run: colcon test-result --verbose --all
