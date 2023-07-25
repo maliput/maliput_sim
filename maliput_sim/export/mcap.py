@@ -42,10 +42,38 @@ from foxglove_schemas_protobuf.SceneUpdate_pb2 import SceneUpdate
 from google.protobuf.duration_pb2 import Duration
 from mcap_protobuf.writer import Writer
 
+from maliput.api import RoadNetwork as MaliputRoadNetwork
+
 
 class MCAP(Exporter):
-    """A Foxglove visualization. This class dumps the simulation states into a mcap file that can be
-    visualized using Foxglove Studio."""
+    """
+    This class dumps the simulation states into a mcap file that can be
+    visualized using Foxglove Studio.
+
+    Each simulation state is dumped to messages in the MCAP format.
+
+    Serialization:
+      MCAP supports several serialization formats. This class relies on the protobuf format.
+
+    Channels:
+      MCAP works on a publish-subscribe model. Each message is published to a channel.
+      - /scene_update:
+          This channel uses the SceneUpdate message type. See https://foxglove.dev/docs/studio/messages/scene-update.
+          Foxglove Studio has a built-in viewer for this message type. So it is recommended to use this
+          channel for the 3D visualization. The scene_update message contains a list of entities. Each entity can have
+          multiple models (primitive shapes or even 3D models).
+          This implementation uses:
+            - One entity for the road network which loads the road network as a 3D model.
+            - One entity for each agent which loads a cube as a 3D model.
+      - /<agent_name>/pose:
+          This channel uses the Pose message type to indicate the pose of the agent.
+          See https://foxglove.dev/docs/studio/messages/pose.
+      - /<agent_name>/behavior/<behavior_index>/<key>:
+          This channel uses the KeyValuePair message type to indicate the values obtained from the behaviors' states
+          in the agents. An agent can have multiple behaviors. Each behavior can have multiple parameters per state.
+          The list of signals to export can be specified using the export_signals argument in the dump method and
+          they should match the keys in the behavior state.
+    """
 
     _DEFAULT_SIMULATION_OUTPUT_FILE_PATH = "simulation.mcap"
 
@@ -66,12 +94,29 @@ class MCAP(Exporter):
     _SCENE_UPDATE_TOPIC = "/scene_update"
 
     def __init__(self, simulation: Simulation, output_file_path: str = ""):
+        """
+        Initialize the exporter.
+
+        Args:
+            simulation: The simulation instance to export.
+            output_file_path: The path to the output file. If empty, the default path will be used.
+        """
         self._output_file_path = (
             output_file_path if output_file_path else self._DEFAULT_SIMULATION_OUTPUT_FILE_PATH)
         super().__init__(simulation)
 
-    def _add_road_network_entity_to_scene(self, road_network, scene_update, sim_time):
-        """Add the road network entity to the scene_update as a model."""
+    def _add_road_network_entity_to_scene(self,
+                                          road_network: MaliputRoadNetwork,
+                                          scene_update: SceneUpdate,
+                                          sim_time: int):
+        """
+        Add the road network entity to the scene_update as a model.
+
+        Args:
+            road_network: The maliput road network to export the model from.
+            scene_update: The SceneUpdate message to add the entity to.
+            sim_time: The simulation time in nanoseconds.
+        """
 
         # Obtain the obj description from the road network.
         obj_description = get_obj_description_from_road_network(
@@ -94,8 +139,16 @@ class MCAP(Exporter):
             data=obj_description
         )
 
-    def _add_agent_entity_to_scene(self, agent_name, pose, scene_update, sim_time):
-        """Add the agent entity to the scene_update as a cube."""
+    def _add_agent_entity_to_scene(self, agent_name: str, pose: List[float], scene_update: SceneUpdate, sim_time: int):
+        """
+        Add the agent entity to the scene_update using a cube as visual.
+
+        Args:
+            agent_name: The name of the agent.
+            pose: The pose of the agent.
+            scene_update: The SceneUpdate message to add the entity to.
+            sim_time: The simulation time in nanoseconds.
+        """
         entity = scene_update.entities.add()
         entity.timestamp.FromNanoseconds(sim_time)
         entity.id = agent_name
