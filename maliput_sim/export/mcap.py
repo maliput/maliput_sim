@@ -84,7 +84,10 @@ class MCAP(Exporter):
     _ROAD_NETWORK_COLOR = Color(r=0.2, g=0.8, b=0.9, a=0.1)
     _ROAD_NETWORK_MODEL_OFFSET = Vector3(x=0, y=0, z=0)
     _ROAD_NETWORK_MODEL_ROTATION = Quaternion(x=-0.70710678118, y=0, z=0, w=0.70710678118)
+    _ROAD_NETWORK_MODEL_POSE = Pose(position=_ROAD_NETWORK_MODEL_OFFSET,
+                                    orientation=_ROAD_NETWORK_MODEL_ROTATION)
     _ROAD_NETWORK_SCALE = Vector3(x=1, y=1, z=1)
+    _ROAD_NETWORK_ENTITY_LIFE_TIME = Duration(seconds=0, nanos=0)
 
     _ROOT_FRAME_ID = "map"
     _MEDIA_TYPE = "model/obj"
@@ -120,7 +123,7 @@ class MCAP(Exporter):
             road_network).encode("utf-8")
 
         entity = scene_update.entities.add(
-            lifetime=Duration(seconds=0, nanos=0)
+            lifetime=self._ROAD_NETWORK_ENTITY_LIFE_TIME
         )
         # Timestamp should match sim time.
         entity.timestamp.FromNanoseconds(sim_time)
@@ -130,10 +133,7 @@ class MCAP(Exporter):
         entity.models.add(
             color=self._ROAD_NETWORK_COLOR,
             override_color=True,
-            pose=Pose(
-                position=self._ROAD_NETWORK_MODEL_OFFSET,
-                orientation=self._ROAD_NETWORK_MODEL_ROTATION
-            ),
+            pose=self._ROAD_NETWORK_MODEL_POSE,
             scale=self._ROAD_NETWORK_SCALE,
             media_type=self._MEDIA_TYPE,
             data=obj_description
@@ -231,7 +231,7 @@ class MCAP(Exporter):
                             orientation=Quaternion(x=pose[3], y=pose[4], z=pose[5], w=pose[6])
                         )
                         writer.write_message(
-                            topic="/" + name + "/pose/",
+                            topic="/" + name + "/pose",
                             message=pose_message,
                             log_time=sim_time_ns,
                             publish_time=sim_time_ns,
@@ -250,7 +250,7 @@ class MCAP(Exporter):
                                         value=value
                                     )
                                     writer.write_message(
-                                        topic="/" + name + "/behavior/" + str(i) + "/" + key + "/",
+                                        topic="/" + name + "/behavior/" + str(i) + "/" + key,
                                         message=key_value_pair_message,
                                         log_time=sim_time_ns,
                                         publish_time=sim_time_ns,
