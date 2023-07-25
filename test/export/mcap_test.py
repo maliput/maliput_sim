@@ -29,10 +29,10 @@
 import os
 import unittest
 
-import shutil
-from unittest.mock import MagicMock
+from shutil import rmtree
 from typing import List
 from tempfile import mkdtemp
+from unittest.mock import MagicMock
 
 from maliput_sim.core.sim import SimulationState
 from maliput_sim.simulation import Simulation
@@ -42,19 +42,20 @@ from foxglove_schemas_protobuf.SceneUpdate_pb2 import SceneUpdate
 from foxglove_schemas_protobuf.Pose_pb2 import Pose
 from foxglove_schemas_protobuf.Quaternion_pb2 import Quaternion
 from foxglove_schemas_protobuf.Vector3_pb2 import Vector3
+from maliput.api import RoadNetwork as MaliputRoadNetwork
 from maliput.plugin import create_road_network
 from mcap_protobuf.decoder import DecoderFactory
 from mcap.reader import make_reader
 
 
-def GetRoadNetwork():
+def get_road_network() -> MaliputRoadNetwork:
     """
     Returns an arbitrary road network.
     """
     # TODO(#12): Rely on a road network loader once that is implemented.
     # Create road network model
-    env = os.getenv("MALIPUT_MALIDRIVE_RESOURCE_ROOT").split(":")
-    env = env[0]
+    env = os.getenv("MALIPUT_MALIDRIVE_RESOURCE_ROOT")
+    env = env.split(":")[0] if env is not None else None
     rn_configuration = {
         "opendrive_file": env + "/resources/odr/TShapeRoad.xodr" if env is not None else "",
         "road_geometry_id": "TShapeRoadRoadNetwork"
@@ -64,7 +65,8 @@ def GetRoadNetwork():
     return maliput_road_network
 
 
-def GetSimulationMock(simulation_states: List[SimulationState], road_network):
+def get_simulation_mock(simulation_states: List[SimulationState],
+                        road_network: MaliputRoadNetwork) -> Simulation:
     """
     Returns a mock simulation with the given simulation states and road network.
 
@@ -78,7 +80,7 @@ def GetSimulationMock(simulation_states: List[SimulationState], road_network):
     return mock_simulation
 
 
-def GetSimulationState(sim_time: float):
+def get_simulation_state(sim_time: float) -> SimulationState:
     """
     Returns a simulation state at a given simulation time.
     The ecm state contains a road network entity and an agent entity.
@@ -116,17 +118,21 @@ def GetSimulationState(sim_time: float):
 class TestMCAP(unittest.TestCase):
     _SIM_STATE_EMPTY = SimulationState(sim_time=0.0, ecm_state={})
 
-    def test_init_method(self):
-        simulation = GetSimulationMock([self._SIM_STATE_EMPTY], None)
+    def test_init(self):
+        simulation = get_simulation_mock([self._SIM_STATE_EMPTY], None)
         dut = MCAP(simulation)
         self.assertEqual(dut._simulation, simulation)
         self.assertEqual(dut._output_file_path, MCAP._DEFAULT_SIMULATION_OUTPUT_FILE_PATH)
+
+    def test_init_with_output_path(self):
+        simulation = get_simulation_mock([self._SIM_STATE_EMPTY], None)
         dut = MCAP(simulation, "random_path.mcap")
+        self.assertEqual(dut._simulation, simulation)
         self.assertEqual(dut._output_file_path, "random_path.mcap")
 
-    def test_add_road_network_entity_to_scene_method(self):
-        road_network = GetRoadNetwork()
-        simulation = GetSimulationMock([self._SIM_STATE_EMPTY], road_network)
+    def test_add_road_network_entity_to_scene(self):
+        road_network = get_road_network()
+        simulation = get_simulation_mock([self._SIM_STATE_EMPTY], road_network)
         scene_update = SceneUpdate()
         sim_time = 12
 
@@ -145,9 +151,9 @@ class TestMCAP(unittest.TestCase):
         self.assertEqual(rn_model.pose, dut._ROAD_NETWORK_MODEL_POSE)
         self.assertTrue(rn_model.data)
 
-    def test_add_agent_entity_to_scene_method(self):
-        road_network = GetRoadNetwork()
-        simulation = GetSimulationMock([self._SIM_STATE_EMPTY], road_network)
+    def test_add_agent_entity_to_scene(self):
+        road_network = get_road_network()
+        simulation = get_simulation_mock([self._SIM_STATE_EMPTY], road_network)
         scene_update = SceneUpdate()
         sim_time = 12
 
@@ -176,17 +182,17 @@ class TestMCAPDumpMethod(unittest.TestCase):
     _FILE_NAME = "mcap_test.mcap"
 
     def setUp(self) -> None:
-        sim = GetSimulationMock([GetSimulationState(0.), GetSimulationState(
-            1.), GetSimulationState(2.)], GetRoadNetwork())
+        sim = get_simulation_mock([get_simulation_state(0.), get_simulation_state(
+            1.), get_simulation_state(2.)], get_road_network())
         self.tmp_dir = mkdtemp()
         self.obj_file_path = os.path.join(self.tmp_dir, self._FILE_NAME)
         self.dut = MCAP(sim, self.obj_file_path)
         return super().setUp()
 
     def tearDown(self) -> None:
-        shutil.rmtree(self.tmp_dir)
+        rmtree(self.tmp_dir)
 
-    def test_dump_method_default_values(self):
+    def test_dump_default_values(self):
         self.dut.dump()
         self.assertTrue(os.path.exists(self.obj_file_path))
         with open(self.obj_file_path, "rb") as f:
@@ -206,7 +212,7 @@ class TestMCAPDumpMethod(unittest.TestCase):
                 self.assertEqual(schema.name, "foxglove.Pose")
                 # TODO: Check the content of the message.
 
-    def test_dump_method_exporting_signals(self):
+    def test_dump_exporting_signals(self):
         self.dut.dump(export_signals=['signal_1'])
         self.assertTrue(os.path.exists(self.obj_file_path))
         with open(self.obj_file_path, "rb") as f:
